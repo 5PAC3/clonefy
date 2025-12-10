@@ -1,11 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Riquadro al Centro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #000000;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .form-control {
+      background-color: #1a1a1a;
+      border: 1px solid #8b00ff;
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 12px 20px;
+    }
+    
+    .form-control::placeholder {
+      color: #b8b8b89a;
+      opacity: 1;
+    }
+    
+    .form-control:focus {
+      background-color: #1a1a1a;
+      border-color: #8b00ff;
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(139,0,255,0.5);
+    }
+    
+    .btn-accedi {
+      background-color: #8b00ff;
+      border: none;
+      color: white;
+      padding: 12px 40px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .btn-accedi:hover {
+      background-color: #a020f0;
+      box-shadow: 0 0 20px rgba(139,0,255,0.6);
+    }
+    
+    .btn-registrati {
+      background-color: transparent;
+      border: 2px solid #8b00ff;
+      color: #8b00ff;
+      padding: 12px 40px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .btn-registrati:hover {
+      background-color: rgba(139,0,255,0.1);
+      box-shadow: 0 0 20px rgba(139,0,255,0.4);
+    }
+    
+    .logo-placeholder {
+      width: 60px;
+      height: 60px;
+      background-color: #8b00ff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
 </head>
-<body>
-    asdfasd
+<body class="d-flex justify-content-center align-items-center vh-100">
+  <div class="position-relative d-flex flex-column justify-content-center align-items-center" 
+       style="width:1000px; 
+              height:800px; 
+              background:#000000; 
+              border-radius: 120px;
+              border: 2px solid #8b00ff;
+              box-shadow: 
+                0 0 30px 5px rgba(139,0,255,0.8),
+                0 0 60px 15px rgba(139,0,255,0.6),
+                0 0 100px 30px rgba(139,0,255,0.4),
+                inset 0 0 30px 5px rgba(139,0,255,0.3);
+              padding: 60px;
+       ">
+    
+    <!-- Logo e Nome -->
+    <div class="d-flex align-items-center mb-5">
+      <div class="logo-placeholder me-3">
+        LOGO
+      </div>
+      <h1 class="text-white m-0" style="font-size: 3rem; font-weight: 700;">Clonefy</h1>
+    </div>
+    
+    <!-- Form -->
+    <div style="width: 500px;">
+      <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Nome utente">
+      </div>
+      
+      <div class="mb-4">
+        <input type="password" class="form-control" placeholder="Password">
+      </div>
+      
+      <div class="d-flex gap-3 mt-4">
+        <button class="btn btn-accedi flex-fill">Accedi</button>
+        <button class="btn btn-registrati flex-fill">Registrati</button>
+      </div>
+    </div>
+    
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
