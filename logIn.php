@@ -73,6 +73,13 @@
       color: white;
       font-weight: bold;
     }
+    .logo-placeholder img {
+      width: 230%;
+      height: 230%;
+      object-fit: contain; /* oppure "cover" se vuoi riempire tutto */
+      border-radius: 10px; /* opzionale, per seguire il bordo del contenitore */
+    }
+
   </style>
 </head>
 
@@ -95,7 +102,7 @@
     <!-- Logo e Nome -->
     <div class="d-flex align-items-center mb-5">
       <div class="logo-placeholder me-3">
-        LOGO
+        <img src="img/Generated Image December 10, 2025 - 9_58AM.png" alt="">
       </div>
       <h1 class="text-white m-0" style="font-size: 3rem; font-weight: 700;">Clonefy</h1>
     </div>
