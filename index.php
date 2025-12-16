@@ -24,8 +24,54 @@
                 <div class="underglow-box p-5"
                     style="height: 800px; display: flex; align-items: center; justify-content: center;">
                     <div class="text-center">
-                        <h1 class="mb-4">Sezione sinistra (3/4)</h1>
+                        <!--h1 class="mb-4">Sezione sinistra (3/4)</h1-->
                         <p class="fs-5">Contenuto della sezione sinistra. Questa sezione occupa il 75% della larghezza della pagina su desktop.</p>
+                        
+                        <div class="row">
+                            <div class="col-lg-3 mb-2"> <!--basta mettere mb-2 qua per dare spazio anche agli altri-->
+                                <div class="underglow-box p-2">
+                                    <p>col1</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="underglow-box p-2">
+                                    <p>col2</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="underglow-box p-2">
+                                    <p>col3</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="underglow-box p-2">
+                                    <p>col4</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-lg-3">
+                                <div class="underglow-box p-2">
+                                    <p>col1</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="underglow-box p-2">
+                                    <p>col2</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="underglow-box p-2">
+                                    <p>col3</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="underglow-box p-2">
+                                    <p>col4</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
