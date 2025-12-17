@@ -1,3 +1,17 @@
+<?php
+  if(!isset($_SESSION))
+    session_start();    
+
+  if (isset($_POST["nomeUtente"]) && isset($_POST["password"])) {
+        $username = $_POST["nomeUtente"];
+        $password = $_POST["password"];
+      $_SESSION['username'] = $username;
+      $_SESSION['password'] = $password;
+    }
+  
+
+?>
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -82,8 +96,6 @@
 
   </style>
 </head>
-
-<!-- AMO L'ALCOL -->
 <body class="d-flex justify-content-center align-items-center vh-100">
   <div class="position-relative d-flex flex-column justify-content-center align-items-center" 
        style="width:1000px; 
@@ -110,21 +122,29 @@
     <!-- Form -->
     <div style="width: 500px;">
       <div class="mb-4">
-        <input type="text" class="form-control" placeholder="Nome utente">
+        <form method="POST">
+          <input name="nomeUtente" type="text" class="form-control" placeholder="Nome utente">
+        </form>
       </div>
       
       <div class="mb-4">
-        <input type="password" class="form-control" placeholder="Password">
+        <form method="POST">
+          <input nome="password" type="password" class="form-control" placeholder="Password">
+        </form>
       </div>
       
       <div class="d-flex gap-3 mt-4">
-        <button class="btn btn-accedi flex-fill">Accedi</button>
-        <button class="btn btn-registrati flex-fill">Registrati</button>
+        <form action="checkLogin.php" method="POST">
+          <button class="btn btn-accedi flex-fill" type="submit">Accedi</button>
+          <button class="btn btn-registrati flex-fill" type="submit">Registrati</button>
+        </form>
       </div>
     </div>
     
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  
 </body>
 </html>
