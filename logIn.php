@@ -2,13 +2,6 @@
   if(!isset($_SESSION))
     session_start();    
 
-  if (isset($_POST["nomeUtente"]) && isset($_POST["password"])) {
-        $username = $_POST["nomeUtente"];
-        $password = $_POST["password"];
-      $_SESSION['username'] = $username;
-      $_SESSION['password'] = $password;
-    }
-  
 
 ?>
 
@@ -120,27 +113,21 @@
     </div>
     
     <!-- Form -->
+     <form action="checkLogin.php" method="POST">
     <div style="width: 500px;">
       <div class="mb-4">
-        <form method="POST">
-          <input name="nomeUtente" type="text" class="form-control" placeholder="Nome utente">
-        </form>
+        
+          <input name="nomeUtente" type="text" class="form-control" placeholder="Nome utente" required>
       </div>
-      
       <div class="mb-4">
-        <form method="POST">
-          <input nome="password" type="password" class="form-control" placeholder="Password">
-        </form>
+          <input name="password" type="password" class="form-control" placeholder="Password" required>
       </div>
-      
       <div class="d-flex gap-3 mt-4">
-        <form action="checkLogin.php" method="POST">
           <button class="btn btn-accedi flex-fill" type="submit">Accedi</button>
           <button class="btn btn-registrati flex-fill" type="submit">Registrati</button>
-        </form>
       </div>
     </div>
-    
+    </form>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
