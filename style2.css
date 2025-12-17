@@ -37,8 +37,8 @@ body::before {
     border: 1px solid rgba(255, 255, 255, 0.07);
     position: relative;
     box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.3),
-        0 1px 0 rgba(255, 255, 255, 0.03),
+        0 4px 20px rgba(128, 0, 145, 0.178),
+        0 1px 0 rgba(70, 0, 64, 0.158),
         inset 0 1px 0 rgba(255, 255, 255, 0.02);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
@@ -46,11 +46,11 @@ body::before {
 
 /* Accento viola solo al passaggio del mouse */
 .underglow-box:hover {
-    border-color: rgba(139, 0, 255, 0.25);
+    border-color: rgba(140, 0, 255, 0.404);
     box-shadow: 
-        0 8px 30px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(139, 0, 255, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        0 8px 30px rgba(234, 0, 255, 0.4),
+        0 0 0 1px rgba(140, 0, 255, 0.404),
+        inset 0 1px 0 rgba(94, 0, 94, 0.281);
     transform: translateY(-2px);
 }
 
@@ -64,6 +64,7 @@ body::before {
 
 /* Tipografia migliorata */
 h1, h2, h3, h4, h5, h6 {
+    color: #c57cfde5;
     font-weight: 600;
     letter-spacing: -0.01em;
     margin-bottom: 1rem;
@@ -77,8 +78,13 @@ h5 { font-size: 1.1rem; }
 h6 { font-size: 1rem; }
 
 /* Colori testi */
+p {
+    color: #ffeefde5;
+    font-weight: 500;
+}
+
 .primary-text {
-    color: #8b00ff;
+    color: #d7a3ff;
     font-weight: 500;
 }
 
