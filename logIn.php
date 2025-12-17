@@ -81,8 +81,6 @@
       font-weight: bold;
     }
     .logo-placeholder img {
-      width: 230%;
-      height: 230%;
       object-fit: contain; /* oppure "cover" se vuoi riempire tutto */
       border-radius: 10px; /* opzionale, per seguire il bordo del contenitore */
     }
@@ -106,10 +104,10 @@
     
     <!-- Logo e Nome -->
     <div class="d-flex align-items-center mb-5">
-      <div class="logo-placeholder me-3">
-        <img src="img/Generated Image December 10, 2025 - 9_58AM.png" alt="">
+      <div class="logo-placeholder me-3 mb-5">
+        <img src="img/logo.png" alt="">
       </div>
-      <h1 class="text-white m-0" style="font-size: 3rem; font-weight: 700;">Clonefy</h1>
+      <!-- Form<h1 class="text-white m-0" style="font-size: 3rem; font-weight: 700;">Clonefy</h1> -->
     </div>
     
     <!-- Form -->
