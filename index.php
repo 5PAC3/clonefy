@@ -20,55 +20,73 @@
     <div class="container-fluid">
         <div class="row align-items-center justify-content-center">
             <!-- Colonna sinistra (3/4) -->
-            <div class="col-lg-9 col-md-12 mb-4">
-                <div class="underglow-box p-5"
-                    style="height: 800px; display: flex; align-items: center; justify-content: center;">
+            <div class="col-lg-9 col-md-12 mb-4";>
+                <div class="underglow-box p-5" style="height : 100vh">
+                    
                     <div class="text-center">
                         <!--h1 class="mb-4">Sezione sinistra (3/4)</h1-->
                         <p class="fs-5">Contenuto della sezione sinistra. Questa sezione occupa il 75% della larghezza della pagina su desktop.</p>
-                        
-                        <div class="row">
-                            <div class="col-lg-3 mb-2"> <!--basta mettere mb-2 qua per dare spazio anche agli altri-->
-                                <div class="underglow-box p-2">
-                                    <p>col1</p>
-                                </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div class="underglow-box p-2">
-                                    <p>col2</p>
-                                </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div class="underglow-box p-2">
-                                    <p>col3</p>
-                                </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div class="underglow-box p-2">
-                                    <p>col4</p>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="row mt-2">
-                            <div class="col-lg-3">
-                                <div class="underglow-box p-2">
-                                    <p>col1</p>
+                        <div class="row" style="overflow-y: scroll; height:900px;">
+
+                            <div class="col-lg-6 mb-3">
+                                <div class="underglow-box p-3">
+                                    <div class="bg-secondary mb-3" style="height: 150px;"></div>
+                                    <h5>After Hours</h5>
+                                    <small class="text-muted">The Weeknd • 2020</small>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-dark w-100">Riproduci</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3">
-                                <div class="underglow-box p-2">
-                                    <p>col2</p>
+                            <div class="col-lg-6 mb-3">
+                                <div class="underglow-box p-3">
+                                    <div class="bg-secondary mb-3" style="height: 150px;"></div>
+                                    <h5>After Hours</h5>
+                                    <small class="text-muted">The Weeknd • 2020</small>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-dark w-100">Riproduci</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3">
-                                <div class="underglow-box p-2">
-                                    <p>col3</p>
+                            <div class="col-lg-6 mb-3">
+                                <div class="underglow-box p-3">
+                                    <div class="bg-secondary mb-3" style="height: 150px;"></div>
+                                    <h5>After Hours</h5>
+                                    <small class="text-muted">The Weeknd • 2020</small>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-dark w-100">Riproduci</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3">
-                                <div class="underglow-box p-2">
-                                    <p>col4</p>
+                            <div class="col-lg-6 mb-3">
+                                <div class="underglow-box p-3">
+                                    <div class="bg-secondary mb-3" style="height: 150px;"></div>
+                                    <h5>After Hours</h5>
+                                    <small class="text-muted">The Weeknd • 2020</small>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-dark w-100">Riproduci</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="underglow-box p-3">
+                                    <div class="bg-secondary mb-3" style="height: 150px;"></div>
+                                    <h5>After Hours</h5>
+                                    <small class="text-muted">The Weeknd • 2020</small>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-dark w-100">Riproduci</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="underglow-box p-3">
+                                    <div class="bg-secondary mb-3" style="height: 150px;"></div>
+                                    <h5>After Hours</h5>
+                                    <small class="text-muted">The Weeknd • 2020</small>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-dark w-100">Riproduci</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -78,7 +96,7 @@
 
             <!-- Colonna destra (1/4) -->
             <div class="col-lg-3 col-md-12 mb-4">
-                <div class="underglow-box p-5"
+                <div class="underglow-box p-5 " style="height : 100vh" >
                     style="height: 800px; display: flex; align-items: center; justify-content: center;">
                     <div class="text-center">
                         <h1 class="mb-4">Sezione destra (1/4)</h1>
