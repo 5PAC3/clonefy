@@ -3,6 +3,10 @@
 if(!isset($_SESSION))
     session_start();    
 
+if($_POST["azione"]==="signup"){
+    header("Location: signUP.php");
+}
+
 
 $username = trim($_POST["nomeUtente"] ?? '');
 $password = trim($_POST["password"] ?? '');
@@ -12,9 +16,6 @@ if ($username === '' || $password === '') {
     exit;
 }
 
-
-echo $_POST["nomeUtente"];
-echo $_POST["password"];
 
 $host = "localhost";   // quasi sempre localhost
 $user = "root";        // utente MySQL
@@ -27,6 +28,38 @@ if ($conn->connect_error) {
     die("Connessione fallita: " . $conn->connect_error);
 }
 
+$stmt = $conn->prepare("SELECT id, password FROM utenti WHERE nomeUtente = ?");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 1) {
+    $row = $result->fetch_assoc();
+    $hash = $row['password'];
+
+    // Verifica password con hash
+    if (password_verify($password, $hash)) {
+        // Login riuscito, salvo info nella sessione
+        $_SESSION['user_id'] = $row['id'];
+        $_SESSION['nomeUtente'] = $username;
+
+        // Redirect alla home
+        header("Location: home.php");
+        exit;
+    } else {
+        // Password sbagliata
+        header("Location: login.php?error=password_errata");
+        exit;
+    }
+} else {
+    // Utente non trovato
+    header("Location: login.php?error=utente_non_trovato");
+    exit;
+}
+
+// Chiudo la connessione
+$conn->close();
+?>
 
 
 ?>
