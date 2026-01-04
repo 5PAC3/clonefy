@@ -28,7 +28,7 @@ if ($conn->connect_error) {
     die("Connessione fallita: " . $conn->connect_error);
 }
 
-$stmt = $conn->prepare("SELECT id, password FROM utenti WHERE nomeUtente = ?");
+$stmt = $conn->prepare("SELECT id, password FROM users WHERE username = ?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -40,11 +40,11 @@ if ($result->num_rows === 1) {
     // Verifica password con hash
     if (password_verify($password, $hash)) {
         // Login riuscito, salvo info nella sessione
-        $_SESSION['user_id'] = $row['id'];
-        $_SESSION['nomeUtente'] = $username;
+        $_SESSION['id'] = $row['id'];
+        $_SESSION['username'] = $username;
 
         // Redirect alla home
-        header("Location: home.php");
+        header("Location: index.php");
         exit;
     } else {
         // Password sbagliata
