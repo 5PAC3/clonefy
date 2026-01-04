@@ -121,8 +121,8 @@
           <input name="password" type="password" class="form-control" placeholder="Password" required>
       </div>
       <div class="d-flex gap-3 mt-4">
-          <button class="btn btn-accedi flex-fill" type="submit">Accedi</button>
-          <button class="btn btn-registrati flex-fill" type="submit">Registrati</button>
+          <button class="btn btn-accedi flex-fill" type="submit"name="azione"value="login">Accedi</button>
+          <button class="btn btn-registrati flex-fill" type="submit"name="azione"value="signup">Registrati</button>
       </div>
     </div>
     </form>
