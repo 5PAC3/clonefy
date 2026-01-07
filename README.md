@@ -21,7 +21,9 @@ Requisiti di Sistema
     MySQL 5.7 o superiore
     Apache
     Browser web moderno
+    
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
 Clonefy Music Platform
 Description
 
