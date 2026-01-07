@@ -122,7 +122,7 @@
       </div>
       <div class="d-flex gap-3 mt-4">
           <button class="btn btn-accedi flex-fill" type="submit"name="azione"value="login">Accedi</button>
-          <button class="btn btn-registrati flex-fill" type="submit"name="azione"value="signup">Registrati</button>
+          <button class="btn btn-registrati flex-fill" type="button" onclick="window.location.href='signUp.php'">Registrati</button>
       </div>
     </div>
     </form>

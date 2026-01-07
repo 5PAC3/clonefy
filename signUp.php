@@ -110,25 +110,51 @@
       <!-- Form<h1 class="text-white m-0" style="font-size: 3rem; font-weight: 700;">Clonefy</h1> -->
     </div>
     
+    <!-- Messaggi di errore/successo -->
+    <?php if(isset($_GET['error'])): ?>
+      <?php 
+      $errors = [
+        'dati_mancanti' => 'Tutti i campi sono obbligatori.',
+        'username_esistente' => 'Username già in uso.',
+        'email_esistente' => 'Email già registrata.',
+        'errore_generico' => 'Errore durante la registrazione. Riprova.',
+        'password_corta' => 'La password deve essere di almeno 6 caratteri.'
+      ];
+      ?>
+      <div class="alert alert-danger mb-4" style="width: 500px; color: white;">
+        <?php echo $errors[$_GET['error']] ?? 'Errore sconosciuto.'; ?>
+      </div>
+    <?php endif; ?>
+    
+    <?php if(isset($_GET['success'])): ?>
+      <div class="alert alert-success mb-4" style="width: 500px;">
+        Registrazione completata con successo! Ora puoi effettuare il login.
+      </div>
+    <?php endif; ?>
+    
     <!-- Form -->
-     <form action="login.php" method="POST">
-    <div style="width: 500px;">
-      <div class="mb-4">
-        
-          <input name="nomeUtente" type="text" class="form-control" placeholder="Nome utente" required>
-      </div>
-      <div class="mb-4">
-          <input name="email" type="email" class="form-control" placeholder="email" required>
-      </div>
-      <div class="mb-4">
+    <form action="checkSignup.php" method="POST">
+      <div style="width: 500px;">
+        <div class="mb-4">
+          <input name="nomeUtente" type="text" class="form-control" placeholder="Nome utente" required
+                 value="<?php echo htmlspecialchars($_GET['username'] ?? ''); ?>">
+        </div>
+        <div class="mb-4">
+          <input name="email" type="email" class="form-control" placeholder="Email" required
+                 value="<?php echo htmlspecialchars($_GET['email'] ?? ''); ?>">
+        </div>
+        <div class="mb-4">
           <input name="password" type="password" class="form-control" placeholder="Password" required>
+          <small class="text-muted mt-1 d-block">La password deve essere di almeno 6 caratteri.</small>
+        </div>
+        <div class="d-flex gap-3 mt-4">
+          <button class="btn btn-accedi flex-fill" type="submit" name="azione" value="signup">Registrati</button>
+          <button class="btn btn-registrati flex-fill" type="button" onclick="window.location.href='login.php'">Accedi</button>
+        </div>
       </div>
-      <div class="d-flex gap-3 mt-4">
-          <button class="btn btn-registrati flex-fill" type="submit">Registrati</button>
-      </div>
-    </div>
     </form>
   </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
