@@ -9,20 +9,19 @@ if($_POST["azione"]==="signup"){
 
 
 $username = trim($_POST["nomeUtente"] ?? '');
-$password = trim($_POST["password"] ?? '');
+$user_password = trim($_POST["password"] ?? '');  // <-- Rinominata
 
-if ($username === '' || $password === '') {
+if ($username === '' || $user_password === '') {  // <-- Cambiato qui
     header("Location: login.php?error=dati_mancanti");
     exit;
 }
 
+$host = "localhost";
+$user = "root";
+$db_password = "";  // <-- Rinominata per chiarezza
+$database = "clonefy";
 
-$host = "localhost";   // quasi sempre localhost
-$user = "root";        // utente MySQL
-$password = "";        // password (spesso vuota in locale)
-$database = "clonefy";    // nome del database
-
-$conn = new mysqli($host, $user, $password, $database);
+$conn = new mysqli($host, $user, $db_password, $database);  // <-- Cambiato qui
 
 if ($conn->connect_error) {
     die("Connessione fallita: " . $conn->connect_error);
@@ -36,9 +35,9 @@ $result = $stmt->get_result();
 if ($result->num_rows === 1) {
     $row = $result->fetch_assoc();
     $hash = $row['password'];
-
+    //error_log($hash);
     // Verifica password con hash
-    if (password_verify($password, $hash)) {
+    if (password_verify($user_password, $hash)) {  
         // Login riuscito, salvo info nella sessione
         $_SESSION['id'] = $row['id'];
         $_SESSION['username'] = $username;
