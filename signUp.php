@@ -12,6 +12,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Riquadro al Centro</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style2.css">
   <style>
     body {
       background-color: #000000;
@@ -121,7 +122,7 @@
         'password_corta' => 'La password deve essere di almeno 6 caratteri.'
       ];
       ?>
-      <div class="alert alert-danger mb-4" style="width: 500px; color: white;">
+      <div class="alert alert-danger mb-4" style="width: 500px; color: #fff3f3ff;">
         <?php echo $errors[$_GET['error']] ?? 'Errore sconosciuto.'; ?>
       </div>
     <?php endif; ?>

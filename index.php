@@ -55,7 +55,7 @@
                         <h4>Nessun brano</h4>
                         <p class="text-muted">Seleziona una canzone per iniziare l'ascolto.</p>
                         <hr style="border-color: rgba(139, 0, 255, 0.2);">
-                        <button class="btn btn-primary w-100" style="background: #8b00ff">LOGOUT</button>
+                        <a href="logout.php" class="btn btn-primary w-100" style="background: #8b00ff">LOGOUT</a>
                     </div>
                 </div>
             </div>
