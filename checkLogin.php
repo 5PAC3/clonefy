@@ -41,6 +41,7 @@ if ($result->num_rows === 1) {
         // Login riuscito, salvo info nella sessione
         $_SESSION['id'] = $row['id'];
         $_SESSION['username'] = $username;
+        $_SESSION['loggato'] = true;
 
         // Redirect alla home
         header("Location: index.php");
