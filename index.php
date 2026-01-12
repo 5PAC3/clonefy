@@ -1,5 +1,6 @@
 <?php
-// PHP (se necessario per altre funzionalità)
+    require_once 'auth.php';
+
 ?>
 
 <!DOCTYPE html>
