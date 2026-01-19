@@ -22,7 +22,7 @@
         <div class="main-row">
             
             <div class="main-col">
-                <div class="underglow-box full-height">
+                <div class="underglow-box full-height" style="margin-top:2px">
                     <div class="content-header">
                         <h2>Esplora Brani</h2>
                         <p class="primary-text">Benvenuto su Clonefy, <?php echo $_SESSION['username'] ?? 'Ospite'; ?></p>
@@ -46,7 +46,7 @@
             </div>
 
             <div class="main-col">
-                <div class="underglow-box full-height">
+                <div class="underglow-box full-height" style="margin-top:2px">
                     <div class="content-header">
                         <h3>In Riproduzione</h3>
                     </div>
