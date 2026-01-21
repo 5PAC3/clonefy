@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Dic 10, 2025 alle 09:33
--- Versione del server: 10.4.32-MariaDB
--- Versione PHP: 8.2.12
+-- Generation Time: Jan 21, 2026 at 09:09 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `playlists`
+-- Table structure for table `playlists`
 --
 
 CREATE TABLE `playlists` (
@@ -38,7 +38,7 @@ CREATE TABLE `playlists` (
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `playlist_songs`
+-- Table structure for table `playlist_songs`
 --
 
 CREATE TABLE `playlist_songs` (
@@ -49,7 +49,7 @@ CREATE TABLE `playlist_songs` (
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `songs`
+-- Table structure for table `songs`
 --
 
 CREATE TABLE `songs` (
@@ -63,20 +63,28 @@ CREATE TABLE `songs` (
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL
+  `password` varchar(255) NOT NULL,
+  `is_artist` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `is_artist`) VALUES
+(1, 'sarto', 'no@no', '$2y$10$k77iUghDlXwUibJDDHbYSOZPm8NfYRc83SttrrIeZjdFkGi.re3j.', 0);
 
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `user_playlist_membership`
+-- Table structure for table `user_playlist_membership`
 --
 
 CREATE TABLE `user_playlist_membership` (
@@ -86,30 +94,30 @@ CREATE TABLE `user_playlist_membership` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 --
--- Indici per le tabelle scaricate
+-- Indexes for dumped tables
 --
 
 --
--- Indici per le tabelle `playlists`
+-- Indexes for table `playlists`
 --
 ALTER TABLE `playlists`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `playlist_songs`
+-- Indexes for table `playlist_songs`
 --
 ALTER TABLE `playlist_songs`
   ADD PRIMARY KEY (`playlist_id`,`song_id`),
   ADD KEY `song_id` (`song_id`);
 
 --
--- Indici per le tabelle `songs`
+-- Indexes for table `songs`
 --
 ALTER TABLE `songs`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -117,47 +125,47 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Indici per le tabelle `user_playlist_membership`
+-- Indexes for table `user_playlist_membership`
 --
 ALTER TABLE `user_playlist_membership`
   ADD PRIMARY KEY (`user_id`,`playlist_id`),
   ADD KEY `playlist_id` (`playlist_id`);
 
 --
--- AUTO_INCREMENT per le tabelle scaricate
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT per la tabella `playlists`
+-- AUTO_INCREMENT for table `playlists`
 --
 ALTER TABLE `playlists`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT per la tabella `songs`
+-- AUTO_INCREMENT for table `songs`
 --
 ALTER TABLE `songs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT per la tabella `users`
+-- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- Limiti per le tabelle scaricate
+-- Constraints for dumped tables
 --
 
 --
--- Limiti per la tabella `playlist_songs`
+-- Constraints for table `playlist_songs`
 --
 ALTER TABLE `playlist_songs`
   ADD CONSTRAINT `playlist_songs_ibfk_1` FOREIGN KEY (`playlist_id`) REFERENCES `playlists` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `playlist_songs_ibfk_2` FOREIGN KEY (`song_id`) REFERENCES `songs` (`id`) ON DELETE CASCADE;
 
 --
--- Limiti per la tabella `user_playlist_membership`
+-- Constraints for table `user_playlist_membership`
 --
 ALTER TABLE `user_playlist_membership`
   ADD CONSTRAINT `user_playlist_membership_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
