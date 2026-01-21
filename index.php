@@ -18,14 +18,33 @@
 </head>
 
 <body style="background-color: black">
+    <nav class="app-navbar mb-2">
+      <a href="#" class="active">Home</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+
     <div class="main-container">
+
+
         <div class="main-row">
             
             <div class="main-col">
-                <div class="underglow-box full-height" style="margin-top:2px">
+                <div class="underglow-box full-height" style="margin-top:5px">
                     <div class="content-header">
-                        <h2>Esplora Brani</h2>
-                        <p class="primary-text">Benvenuto su Clonefy, <?php echo $_SESSION['username'] ?? 'Ospite'; ?></p>
+                        <div class="content-header-left mt-2" style="position:relative;">
+                                <h2>Esplora Brani</h2>
+                                <p class="primary-text">
+                                    Benvenuto su Clonefy, <?php echo $_SESSION['username'] ?? 'Ospite'; ?>
+                                </p>
+                                <button class="btn btn-dark" style="position:absolute;right:10px;top:10px;">
+                                    Nuova Playlist
+                                </button>
+                            </div>
+
+                            <div class="content-header-right" >
+                                
+                            </div>
                     </div>
 
                     <div class="scrollable-content">
@@ -40,13 +59,13 @@
                                     </div>
                                 </div>
                             </div>
-                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="main-col">
-                <div class="underglow-box full-height" style="margin-top:2px">
+                <div class="underglow-box full-height" style="margin-top:5px">
                     <div class="content-header">
                         <h3>In Riproduzione</h3>
                     </div>
