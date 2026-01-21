@@ -538,3 +538,10 @@ button, .btn, input[type="text"], .form-control {
     border-bottom: 2px solid #8b00ff;
     color: #d7a3ff;
 }
+
+audio {
+    width: 100%;
+    height: 35px; /* Assicurati che l'altezza non sia 0 */
+    display: block !important; /* Forza la visualizzazione */
+    filter: invert(100%); /* Lo rende bianco se il browser lo fa nero */
+}
