@@ -26,7 +26,7 @@ if($_POST["azione"]==="signup"){
     // Connessione al database
     $host = "localhost";
     $user = "root";
-    $db_password = "";
+    $db_password = "tiamotilda";
     $database = "clonefy";
     
     $conn = new mysqli($host, $user, $db_password, $database);

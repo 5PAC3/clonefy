@@ -18,7 +18,7 @@ if ($username === '' || $user_password === '') {  // <-- Cambiato qui
 
 $host = "localhost";
 $user = "root";
-$db_password = "";  // <-- Rinominata per chiarezza
+$db_password = "tiamotilda";  // <-- Rinominata per chiarezza
 $database = "clonefy";
 
 $conn = new mysqli($host, $user, $db_password, $database);  // <-- Cambiato qui
