@@ -4,6 +4,8 @@ if(!isset($_SESSION))
     session_start();    
 
 // Verifico se la richiesta è di signup
+require_once 'conn.php';
+
 if($_POST["azione"]==="signup"){
     
     // Prendo e pulisco i dati
@@ -22,13 +24,7 @@ if($_POST["azione"]==="signup"){
         header("Location: signUp.php?error=password_corta&username=" . urlencode($username) . "&email=" . urlencode($email));
         exit;
     }
-    
-    // Connessione al database
-    $host = "localhost";
-    $user = "root";
-    $db_password = "";
-    $database = "clonefy";
-    
+     
     $conn = new mysqli($host, $user, $db_password, $database);
     
     if ($conn->connect_error) {

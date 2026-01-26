@@ -7,6 +7,7 @@ if($_POST["azione"]==="signup"){
     header("Location: signUP.php");
 }
 
+require_once 'conn.php';
 
 $username = trim($_POST["nomeUtente"] ?? '');
 $user_password = trim($_POST["password"] ?? '');  // <-- Rinominata
@@ -16,10 +17,7 @@ if ($username === '' || $user_password === '') {  // <-- Cambiato qui
     exit;
 }
 
-$host = "localhost";
-$user = "root";
-$db_password = "";  // <-- Rinominata per chiarezza
-$database = "clonefy";
+//tolte perchè c'è il file conn.php
 
 $conn = new mysqli($host, $user, $db_password, $database);  // <-- Cambiato qui
 
