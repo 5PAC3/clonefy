@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 28, 2026 at 08:22 AM
+-- Generation Time: Jan 28, 2026 at 09:17 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -29,6 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `playlists` (
   `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
   `descrizione` text DEFAULT NULL,
   `is_pubblica` tinyint(1) DEFAULT 0,
@@ -64,6 +65,13 @@ CREATE TABLE `songs` (
   `copertina` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Dumping data for table `songs`
+--
+
+INSERT INTO `songs` (`id`, `user_id`, `titolo`, `artista`, `genere`, `anno`, `durata`, `file_path`, `copertina`, `created_at`) VALUES
+(1, 1, 'See you again', 'Tyler the Creator', 'Pop?', 2020, NULL, 'canzoni/81/df/81df4c1eec4b2da42d87cf4d24b787fe.mp3', NULL, '2026-01-28 08:01:18');
 
 -- --------------------------------------------------------
 
@@ -108,7 +116,8 @@ CREATE TABLE `user_playlist_membership` (
 -- Indexes for table `playlists`
 --
 ALTER TABLE `playlists`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `playlist_songs`
@@ -153,7 +162,7 @@ ALTER TABLE `playlists`
 -- AUTO_INCREMENT for table `songs`
 --
 ALTER TABLE `songs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -164,6 +173,12 @@ ALTER TABLE `users`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `playlists`
+--
+ALTER TABLE `playlists`
+  ADD CONSTRAINT `playlists_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `playlist_songs`
