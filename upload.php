@@ -7,18 +7,17 @@ $errori = [];
 $successo = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Dati base
+    // Dati base (come prima)
     $titolo = trim($_POST['titolo'] ?? '');
     $artista = trim($_POST['artista'] ?? '');
     $genere = trim($_POST['genere'] ?? '');
     $anno = trim($_POST['anno'] ?? '');
     $user_id = $_SESSION['id'];
     
-    // Validazioni minime
+    // Validazioni (come prima)
     if (empty($titolo)) $errori[] = "Titolo obbligatorio";
     if (empty($artista)) $errori[] = "Artista obbligatorio";
     
-    // File audio
     if (!isset($_FILES['audio']) || $_FILES['audio']['error'] !== UPLOAD_ERR_OK) {
         $errori[] = "File audio obbligatorio";
     } else {
@@ -29,35 +28,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errori[] = "Solo MP3, WAV o OGG";
         }
         
-        if ($audio['size'] > 20000000) { // 20MB
+        if ($audio['size'] > 20000000) {
             $errori[] = "File troppo grande (max 20MB)";
         }
     }
     
     // Solo se tutto ok
     if (empty($errori)) {
-        // Nome file semplice
-        $timestamp = time();
-        $titolo_safe = preg_replace('/[^\w\s-]/', '', $titolo);
-        $titolo_safe = preg_replace('/\s+/', '_', $titolo_safe);
-        $artista_safe = preg_replace('/[^\w\s-]/', '', $artista);
-        $artista_safe = preg_replace('/\s+/', '_', $artista_safe);
+        // Genera hash MD5 del contenuto del file
+        $hash = md5_file($audio['tmp_name']);
         
-        $nome_file = $titolo_safe . '_' . $artista_safe . '_' . $timestamp . '.' . $estensione;
-        $percorso = 'canzoni/' . $nome_file;
+        // Prendi primi 4 caratteri per cartelle
+        $prima_cartella = substr($hash, 0, 2);
+        $seconda_cartella = substr($hash, 2, 2);
         
-        // Sposta file
-        if (move_uploaded_file($audio['tmp_name'], $percorso)) {
+        // Crea struttura cartelle se non esistono
+        $percorso_base = 'canzoni/' . $prima_cartella . '/' . $seconda_cartella . '/';
+        
+        if (!is_dir($percorso_base)) {
+            mkdir($percorso_base, 0755, true);
+        }
+        
+        // Nome file completo
+        $nome_file = $hash . '.' . $estensione;
+        $percorso_completo = $percorso_base . $nome_file;
+        
+        // Sposta file nella struttura gerarchica
+        if (move_uploaded_file($audio['tmp_name'], $percorso_completo)) {
             // Inserisci nel DB
             $conn = new mysqli($host, $user, $db_password, $database);
             $stmt = $conn->prepare("INSERT INTO songs (titolo, artista, genere, anno, file_path, user_id) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssi", $titolo, $artista, $genere, $anno, $percorso, $user_id);
+            $stmt->bind_param("sssssi", $titolo, $artista, $genere, $anno, $percorso_completo, $user_id);
             
             if ($stmt->execute()) {
                 $successo = true;
             } else {
                 $errori[] = "Errore database";
-                unlink($percorso);
+                // Elimina file se DB fallisce
+                if (file_exists($percorso_completo)) {
+                    unlink($percorso_completo);
+                }
             }
             $conn->close();
         } else {
@@ -101,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         <?php if ($successo): ?>
                             <div class="alert alert-success">
-                                Canzone caricata!
+                                Canzone caricata con successo!
                             </div>
                         <?php endif; ?>
                         
@@ -133,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="mb-3">
                                 <label class="form-label">File Audio *</label>
                                 <input type="file" name="audio" class="form-control" accept=".mp3,.wav,.ogg" required>
-                                <small class="text-muted">Max 20MB</small>
+                                <small class="text-muted">Max 20MB. Verrà salvato con hash MD5.</small>
                             </div>
                             
                             <button type="submit" class="btn btn-primary w-100" style="background: #8b00ff">
@@ -141,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </button>
                             
                             <div class="text-center mt-3">
-                                <a href="index.php" class="text-muted">← Torna alla Home</a>
+                                <a href="index.php" class="text-muted">Torna alla Home</a>
                             </div>
                         </form>
                     </div>
