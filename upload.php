@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         <?php if ($successo): ?>
                             <div class="alert alert-success">
-                                ✅ Canzone caricata!
+                                Canzone caricata!
                             </div>
                         <?php endif; ?>
                         
