@@ -1,6 +1,9 @@
 <?php
-require_once 'auth.php';
+  if(!isset($_SESSION))
+    session_start();    
+
 require_once 'conn.php';
+require_once 'auth.php';
 
 // Connessione al DB per prendere le playlist dell'utente
 $conn = new mysqli($host, $user, $db_password, $database);

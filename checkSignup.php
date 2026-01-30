@@ -15,13 +15,13 @@ if($_POST["azione"]==="signup"){
     
     // Validazione base
     if ($username === '' || $email === '' || $password === '') {
-        header("Location: signUp.php?error=dati_mancanti&username=" . urlencode($username) . "&email=" . urlencode($email));
+        header("Location: signup.php?error=dati_mancanti&username=" . urlencode($username) . "&email=" . urlencode($email));
         exit;
     }
     
     // Verifica lunghezza password
     if (strlen($password) < 6) {
-        header("Location: signUp.php?error=password_corta&username=" . urlencode($username) . "&email=" . urlencode($email));
+        header("Location: signup.php?error=password_corta&username=" . urlencode($username) . "&email=" . urlencode($email));
         exit;
     }
      
@@ -39,7 +39,7 @@ if($_POST["azione"]==="signup"){
     
     if ($result->num_rows > 0) {
         $conn->close();
-        header("Location: signUp.php?error=username_esistente&username=" . urlencode($username) . "&email=" . urlencode($email));
+        header("Location: signup.php?error=username_esistente&username=" . urlencode($username) . "&email=" . urlencode($email));
         exit;
     }
     
@@ -51,7 +51,7 @@ if($_POST["azione"]==="signup"){
     
     if ($result->num_rows > 0) {
         $conn->close();
-        header("Location: signUp.php?error=email_esistente&username=" . urlencode($username) . "&email=" . urlencode($email));
+        header("Location: signup.php?error=email_esistente&username=" . urlencode($username) . "&email=" . urlencode($email));
         exit;
     }
     
@@ -64,11 +64,11 @@ if($_POST["azione"]==="signup"){
     
     if ($stmt->execute()) {
         $conn->close();
-        header("Location: signUp.php?success=true");
+        header("Location: signup.php?success=true");
         exit;
     } else {
         $conn->close();
-        header("Location: signUp.php?error=errore_generico&username=" . urlencode($username) . "&email=" . urlencode($email));
+        header("Location: signup.php?error=errore_generico&username=" . urlencode($username) . "&email=" . urlencode($email));
         exit;
     }
     

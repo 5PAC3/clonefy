@@ -2,6 +2,9 @@
 // Inizializza la sessione per poterla chiudere
 session_start();
 
+require_once 'conn.php';
+
+
 // Rimuove tutte le variabili di sessione
 $_SESSION = array();
 
