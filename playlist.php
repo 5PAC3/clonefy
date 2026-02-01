@@ -116,72 +116,90 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
     <link rel="stylesheet" href="style2.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
+    <!-- Font Awesome per icone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body style="background-color: black">
-    <!-- Navbar -->
-    <nav class="app-navbar mb-2 d-flex justify-content-between">
+    <!-- Navbar FISSA -->
+    <nav class="app-navbar d-flex justify-content-between" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; margin: 10px; width: calc(100% - 20px); backdrop-filter: blur(10px); background: rgba(18, 18, 18, 0.95);">
         <div>
-            <a href="index.php">Home</a>
-            <a href="upload.php">Carica Canzone</a>
-            <a href="playlist.php?id=<?php echo $playlist_id; ?>" class="active">Playlist</a>
+            <a href="index.php"><i class="fas fa-home mr-1"></i> Home</a>
+            <a href="upload.php"><i class="fas fa-upload mr-1"></i> Carica Canzone</a>
+            <a href="playlist.php?id=<?php echo $playlist_id; ?>" class="active"><i class="fas fa-list-music mr-1"></i> Playlist</a>
         </div>
         <div class="dropdown">
             <button class="btn btn-link text-white" type="button" data-toggle="dropdown" 
-                    style="font-size: 24px; padding: 0 10px;">
-                ⋮
+                    style="font-size: 24px; padding: 0 10px; background: transparent; border: none;">
+                <i class="fas fa-ellipsis-v"></i>
             </button>
-            <div class="dropdown-menu dropdown-menu-right bg-dark border-dark">
-                <a class="dropdown-item text-white" href="index.php">Tutte le Playlist</a>
+            <div class="dropdown-menu dropdown-menu-right bg-dark border border-secondary" style="min-width: 180px;">
+                <a class="dropdown-item text-white" href="index.php"><i class="fas fa-th-list mr-2"></i>Tutte le Playlist</a>
                 <div class="dropdown-divider border-secondary"></div>
-                <a class="dropdown-item text-white" href="logout.php">Logout</a>
+                <a class="dropdown-item text-danger" href="logout.php"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
             </div>
         </div>
     </nav>
 
-    <div class="main-container">
+    <!-- Container principale SPAZIATO DALLA NAVBAR -->
+    <div class="main-container" style="position: absolute; top: 70px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 70px); padding: 20px;">
         <div class="main-row">
             <!-- SINISTRA: 75% Dettaglio Playlist -->
             <div class="main-col">
-                <div class="underglow-box full-height" style="margin-top:5px">
-                    <div class="content-header">
-                        <div class="content-header-left mt-2" style="position:relative;">
-                            <!-- Badge e info playlist -->
-                            <div class="d-flex align-items-center mb-2">
-                                <?php if ($ruolo_utente === 'proprietario'): ?>
-                                    <span class="badge badge-primary mr-2">Tua Playlist</span>
-                                <?php elseif ($ruolo_utente === 'collaboratore'): ?>
-                                    <span class="badge badge-secondary mr-2">Collaboratore</span>
+                <div class="underglow-box full-height">
+                    <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <!-- Badge e info playlist -->
+                                <div class="d-flex align-items-center mb-2 flex-wrap">
+                                    <?php if ($ruolo_utente === 'proprietario'): ?>
+                                        <span class="badge badge-primary mr-2 mb-1" style="background: linear-gradient(135deg, #8b00ff, #7000d4);">
+                                            <i class="fas fa-crown mr-1"></i>Tua Playlist
+                                        </span>
+                                    <?php elseif ($ruolo_utente === 'collaboratore'): ?>
+                                        <span class="badge badge-secondary mr-2 mb-1" style="background: linear-gradient(135deg, #555, #666);">
+                                            <i class="fas fa-user-friends mr-1"></i>Collaboratore
+                                        </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($playlist['is_pubblica'] == 1): ?>
+                                        <span class="badge badge-success mb-1" style="background: linear-gradient(135deg, #28a745, #1e7e34);">
+                                            <i class="fas fa-globe mr-1"></i>Pubblica
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <h2 class="mb-1" style="color: #d7a3ff; font-weight: 700;"><?php echo htmlspecialchars($playlist['nome']); ?></h2>
+                                
+                                <?php if ($playlist['descrizione']): ?>
+                                    <p class="mb-2" style="color: #ccc; font-size: 1rem;">
+                                        <?php echo htmlspecialchars($playlist['descrizione']); ?>
+                                    </p>
                                 <?php endif; ?>
                                 
-                                <?php if ($playlist['is_pubblica'] == 1): ?>
-                                    <span class="badge badge-success">Pubblica</span>
-                                <?php endif; ?>
+                                <div class="d-flex align-items-center text-muted">
+                                    <small>
+                                        <i class="fas fa-user mr-1"></i>Creata da <?php echo htmlspecialchars($playlist['proprietario_nome']); ?>
+                                    </small>
+                                    <span class="mx-2">•</span>
+                                    <small>
+                                        <i class="fas fa-music mr-1"></i><?php echo $result_canzoni->num_rows; ?> canzoni
+                                    </small>
+                                </div>
                             </div>
                             
-                            <h2><?php echo htmlspecialchars($playlist['nome']); ?></h2>
-                            <p class="primary-text">
-                                <?php if ($playlist['descrizione']): ?>
-                                    <?php echo htmlspecialchars($playlist['descrizione']); ?><br>
-                                <?php endif; ?>
-                                <small class="text-muted">
-                                    Creata da <?php echo htmlspecialchars($playlist['proprietario_nome']); ?> • 
-                                    <?php echo $result_canzoni->num_rows; ?> canzoni
-                                </small>
-                            </p>
-                            
                             <!-- Pulsanti azioni -->
-                            <div style="position:absolute;right:10px;top:10px;">
+                            <div class="d-flex">
                                 <?php if ($ruolo_utente === 'proprietario' || $ruolo_utente === 'collaboratore'): ?>
                                     <button class="btn btn-dark mr-2" data-toggle="modal" data-target="#aggiungiCanzoniModal">
-                                        Aggiungi Canzoni
+                                        <i class="fas fa-plus mr-1"></i>Aggiungi Canzoni
                                     </button>
                                 <?php endif; ?>
-                                <button class="btn btn-primary" style="background: #8b00ff" onclick="riproduciTuttaPlaylist()">
-                                    Riproduci Tutta
+                                <button class="btn btn-primary" style="background: linear-gradient(135deg, #8b00ff, #7000d4); border: none;" onclick="riproduciTuttaPlaylist()">
+                                    <i class="fas fa-play mr-1"></i>Riproduci Tutta
                                 </button>
                             </div>
                         </div>
@@ -191,62 +209,75 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
                         <!-- Messaggi successo/errore -->
                         <?php if (isset($_GET['success'])): ?>
                             <?php if ($_GET['success'] === 'canzone_rimossa'): ?>
-                                <div class="alert alert-success">Canzone rimossa dalla playlist</div>
+                                <div class="alert alert-success" style="border-left: 4px solid #28a745; background: rgba(40, 167, 69, 0.15); border-radius: 8px;">
+                                    <i class="fas fa-check-circle mr-2"></i>Canzone rimossa dalla playlist
+                                </div>
                             <?php elseif ($_GET['success'] === 'canzoni_aggiunte'): ?>
-                                <div class="alert alert-success">
+                                <div class="alert alert-success" style="border-left: 4px solid #28a745; background: rgba(40, 167, 69, 0.15); border-radius: 8px;">
+                                    <i class="fas fa-check-circle mr-2"></i>
                                     <?php echo intval($_GET['count'] ?? 0); ?> canzoni aggiunte alla playlist
                                 </div>
                             <?php endif; ?>
                         <?php endif; ?>
                         
                         <!-- Lista canzoni -->
-                        <div class="underglow-box p-3">
+                        <div class="underglow-box p-3" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px;">
                             <?php if ($result_canzoni->num_rows > 0): ?>
                                 <div class="table-responsive">
-                                    <table class="table table-dark table-hover">
+                                    <table class="table table-dark table-hover" style="border-collapse: separate; border-spacing: 0;">
                                         <thead>
-                                            <tr>
-                                                <th style="width: 50px;">#</th>
-                                                <th>Titolo</th>
-                                                <th>Artista</th>
-                                                <th>Genere</th>
-                                                <th>Caricata da</th>
-                                                <th style="width: 150px;">Azioni</th>
+                                            <tr style="background: rgba(139, 0, 255, 0.1);">
+                                                <th style="width: 50px; color: #d7a3ff; border-top-left-radius: 8px; padding: 15px;">#</th>
+                                                <th style="color: #d7a3ff; padding: 15px;">Titolo</th>
+                                                <th style="color: #d7a3ff; padding: 15px;">Artista</th>
+                                                <th style="color: #d7a3ff; padding: 15px;">Genere</th>
+                                                <th style="color: #d7a3ff; padding: 15px;">Caricata da</th>
+                                                <th style="width: 200px; color: #d7a3ff; border-top-right-radius: 8px; padding: 15px;">Azioni</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php $contatore = 1; ?>
                                             <?php while ($canzone = $result_canzoni->fetch_assoc()): ?>
-                                                <tr>
-                                                    <td class="text-muted"><?php echo $contatore++; ?></td>
-                                                    <td>
-                                                        <strong><?php echo htmlspecialchars($canzone['titolo']); ?></strong>
-                                                        <?php if ($canzone['anno']): ?>
-                                                            <br><small class="text-muted"><?php echo htmlspecialchars($canzone['anno']); ?></small>
-                                                        <?php endif; ?>
+                                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.2s ease;">
+                                                    <td class="text-muted" style="padding: 15px; font-weight: 600;"><?php echo $contatore++; ?></td>
+                                                    <td style="padding: 15px;">
+                                                        <div>
+                                                            <strong style="color: #fff; display: block;"><?php echo htmlspecialchars($canzone['titolo']); ?></strong>
+                                                            <?php if ($canzone['anno']): ?>
+                                                                <small class="text-muted"><?php echo htmlspecialchars($canzone['anno']); ?></small>
+                                                            <?php endif; ?>
+                                                        </div>
                                                     </td>
-                                                    <td><?php echo htmlspecialchars($canzone['artista']); ?></td>
-                                                    <td>
+                                                    <td style="padding: 15px; color: #ccc;"><?php echo htmlspecialchars($canzone['artista']); ?></td>
+                                                    <td style="padding: 15px;">
                                                         <?php if ($canzone['genere']): ?>
-                                                            <span class="badge badge-secondary"><?php echo htmlspecialchars($canzone['genere']); ?></span>
+                                                            <span class="badge" style="background: linear-gradient(135deg, #333, #444); color: #ddd; border-radius: 20px; padding: 5px 12px; font-weight: 500;">
+                                                                <?php echo htmlspecialchars($canzone['genere']); ?>
+                                                            </span>
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td><small class="text-muted"><?php echo htmlspecialchars($canzone['caricato_da']); ?></small></td>
-                                                    <td>
+                                                    <td style="padding: 15px;">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['caricato_da']); ?>
+                                                        </small>
+                                                    </td>
+                                                    <td style="padding: 15px;">
                                                         <div class="d-flex">
-                                                            <button class="btn btn-sm btn-dark mr-1" 
+                                                            <button class="btn btn-sm mr-2" 
                                                                     onclick="riproduciCanzoneSingola('<?php echo htmlspecialchars($canzone['file_path']); ?>', 
                                                                             '<?php echo addslashes($canzone['titolo']); ?>', 
-                                                                            '<?php echo addslashes($canzone['artista']); ?>')">
-                                                                ▶ Riproduci
+                                                                            '<?php echo addslashes($canzone['artista']); ?>')"
+                                                                    style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                                <i class="fas fa-play mr-1"></i>Riproduci
                                                             </button>
                                                             <?php if ($ruolo_utente === 'proprietario' || $ruolo_utente === 'collaboratore'): ?>
                                                                 <form method="POST" style="display:inline;">
                                                                     <input type="hidden" name="azione" value="rimuovi_canzone">
                                                                     <input type="hidden" name="song_id" value="<?php echo $canzone['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-danger ml-1" 
-                                                                            onclick="return confirm('Rimuovere questa canzone dalla playlist?')">
-                                                                        ✕
+                                                                    <button type="submit" class="btn btn-sm" 
+                                                                            onclick="return confirm('Rimuovere questa canzone dalla playlist?')"
+                                                                            style="background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.3); border-radius: 6px; padding: 6px 12px;">
+                                                                        <i class="fas fa-times mr-1"></i>Rimuovi
                                                                     </button>
                                                                 </form>
                                                             <?php endif; ?>
@@ -259,11 +290,14 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
                                 </div>
                             <?php else: ?>
                                 <div class="text-center py-5">
-                                    <h5 class="text-muted">Questa playlist è vuota</h5>
-                                    <p class="text-muted">Aggiungi delle canzoni per iniziare ad ascoltare</p>
+                                    <div class="mb-4" style="font-size: 64px; color: rgba(139, 0, 255, 0.3);">
+                                        <i class="fas fa-music"></i>
+                                    </div>
+                                    <h5 class="text-muted mb-2">Questa playlist è vuota</h5>
+                                    <p class="text-muted mb-4">Aggiungi delle canzoni per iniziare ad ascoltare</p>
                                     <?php if ($ruolo_utente === 'proprietario' || $ruolo_utente === 'collaboratore'): ?>
-                                        <button class="btn btn-dark" data-toggle="modal" data-target="#aggiungiCanzoniModal">
-                                            Aggiungi Canzoni
+                                        <button class="btn btn-dark" data-toggle="modal" data-target="#aggiungiCanzoniModal" style="border: 1px solid rgba(139, 0, 255, 0.3);">
+                                            <i class="fas fa-plus mr-1"></i>Aggiungi Canzoni
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -275,34 +309,45 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
 
             <!-- DESTRA: 25% Player -->
             <div class="main-col">
-                <div class="underglow-box full-height" style="margin-top:5px">
-                    <div class="content-header">
-                        <h3>Riproduzione</h3>
+                <div class="underglow-box full-height">
+                    <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
+                        <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-play-circle mr-2"></i>Riproduzione</h3>
                     </div>
                     <div class="scrollable-content text-center">
-                        <div id="album-cover" class="bg-secondary rounded-circle mx-auto mb-4" 
-                             style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc;">
-                            ♫
+                        <div id="album-cover" class="mx-auto mb-4" 
+                             style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc; border-radius: 12px; background: linear-gradient(135deg, #222, #333); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); overflow: hidden;">
+                            <div id="cover-initial" style="font-size: 72px;">♫</div>
+                            <img id="cover-image" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
                         </div>
                         
-                        <h4 id="titolo-canzone">Nessun brano</h4>
-                        <p id="artista-canzone" class="text-muted">Seleziona una canzone</p>
+                        <h4 id="titolo-canzone" style="color: #fff; font-weight: 600; margin-bottom: 5px;">Nessun brano</h4>
+                        <p id="artista-canzone" class="text-muted" style="margin-bottom: 20px;">Seleziona una canzone</p>
                         
-                        <audio id="player" controls class="w-100 mb-3" style="height: 40px;">
+                        <audio id="player" controls class="w-100 mb-4" style="height: 45px; border-radius: 8px; background: rgba(25, 25, 25, 0.8);">
                             Il tuo browser non supporta l'elemento audio.
                         </audio>
                         
-                        <div class="d-flex justify-content-center mb-3">
-                            <button class="btn btn-sm btn-dark mr-2" onclick="document.getElementById('player').currentTime -= 10">-10s</button>
-                            <button class="btn btn-sm btn-dark mr-2" onclick="document.getElementById('player').play()">Play</button>
-                            <button class="btn btn-sm btn-dark" onclick="document.getElementById('player').pause()">Pausa</button>
+                        <div class="d-flex justify-content-center mb-4">
+                            <button class="btn btn-sm mr-2" onclick="document.getElementById('player').currentTime -= 10" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
+                                <i class="fas fa-backward mr-1"></i>10s
+                            </button>
+                            <button class="btn btn-sm mr-2" onclick="document.getElementById('player').play()" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 8px 20px;">
+                                <i class="fas fa-play mr-1"></i>Play
+                            </button>
+                            <button class="btn btn-sm" onclick="document.getElementById('player').pause()" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
+                                <i class="fas fa-pause mr-1"></i>Pausa
+                            </button>
                         </div>
                         
-                        <hr style="border-color: rgba(139, 0, 255, 0.2);">
+                        <hr style="border-color: rgba(139, 0, 255, 0.2); margin: 25px 0;">
                         
                         <div class="text-left">
-                            <small class="d-block mb-2"><a href="upload.php" class="text-muted">Carica canzone</a></small>
-                            <small class="d-block"><a href="index.php" class="text-muted">← Tutte le Playlist</a></small>
+                            <a href="upload.php" class="d-block mb-3" style="color: #8b00ff; text-decoration: none;">
+                                <i class="fas fa-upload mr-2"></i>Carica canzone
+                            </a>
+                            <a href="index.php" class="d-block" style="color: #ccc; text-decoration: none;">
+                                <i class="fas fa-arrow-left mr-2"></i>Tutte le Playlist
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -313,10 +358,10 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
     <!-- MODAL: Aggiungi Canzoni alla Playlist -->
     <div class="modal fade" id="aggiungiCanzoniModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content bg-dark border border-secondary">
-                <div class="modal-header border-secondary">
-                    <h5 class="modal-title text-white">Aggiungi Canzoni alla Playlist</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
+            <div class="modal-content" style="background: rgba(18, 18, 18, 0.98); backdrop-filter: blur(10px); border: 1px solid rgba(139, 0, 255, 0.2); border-radius: 12px;">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
+                    <h5 class="modal-title text-white"><i class="fas fa-plus-circle mr-2"></i>Aggiungi Canzoni alla Playlist</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" style="opacity: 0.8;">
                         <span>&times;</span>
                     </button>
                 </div>
@@ -326,35 +371,52 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
                             <input type="hidden" name="azione" value="aggiungi_canzoni">
                             
                             <div class="form-group">
-                                <label class="text-white mb-3">Seleziona le canzoni da aggiungere (Ctrl+click per selezionarne più di una):</label>
-                                <select name="canzoni[]" multiple class="form-control bg-dark text-white border-secondary" 
-                                        size="10" style="height: 300px;">
+                                <label class="text-white mb-3" style="font-size: 1rem;">
+                                    <i class="fas fa-music mr-1"></i>Seleziona le canzoni da aggiungere:
+                                </label>
+                                <select name="canzoni[]" multiple class="form-control" 
+                                        size="10" style="height: 300px; background: rgba(25, 25, 25, 0.9); color: #fff; border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 8px; padding: 10px;">
                                     <?php while ($canzone = $result_tutte_canzoni->fetch_assoc()): ?>
-                                        <option value="<?php echo $canzone['id']; ?>">
-                                            <?php echo htmlspecialchars($canzone['titolo']); ?> - 
-                                            <?php echo htmlspecialchars($canzone['artista']); ?>
-                                            <?php if ($canzone['genere']): ?>
-                                                (<?php echo htmlspecialchars($canzone['genere']); ?>)
-                                            <?php endif; ?>
+                                        <option value="<?php echo $canzone['id']; ?>" style="padding: 10px; margin: 2px 0; border-radius: 4px;">
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span>
+                                                    <strong><?php echo htmlspecialchars($canzone['titolo']); ?></strong> - 
+                                                    <?php echo htmlspecialchars($canzone['artista']); ?>
+                                                </span>
+                                                <?php if ($canzone['genere']): ?>
+                                                    <span class="badge" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border-radius: 12px; padding: 3px 10px; font-size: 0.8rem;">
+                                                        <?php echo htmlspecialchars($canzone['genere']); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </option>
                                     <?php endwhile; ?>
                                 </select>
-                                <small class="text-muted">Tieni premuto Ctrl (o Cmd su Mac) per selezionare più canzoni</small>
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="fas fa-info-circle mr-1"></i>Tieni premuto Ctrl (o Cmd su Mac) per selezionare più canzoni
+                                </small>
                             </div>
                         </form>
                     <?php else: ?>
                         <div class="text-center py-4">
-                            <h5 class="text-muted">Nessuna canzone disponibile</h5>
-                            <p class="text-muted">Tutte le canzoni sono già in questa playlist</p>
-                            <a href="upload.php" class="btn btn-dark">Carica Nuova Canzone</a>
+                            <div class="mb-3" style="font-size: 48px; color: rgba(139, 0, 255, 0.3);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">Nessuna canzone disponibile</h5>
+                            <p class="text-muted mb-4">Tutte le canzoni sono già in questa playlist</p>
+                            <a href="upload.php" class="btn btn-dark" style="border: 1px solid rgba(139, 0, 255, 0.3);">
+                                <i class="fas fa-upload mr-1"></i>Carica Nuova Canzone
+                            </a>
                         </div>
                     <?php endif; ?>
                 </div>
-                <div class="modal-footer border-secondary">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                <div class="modal-footer" style="border-top: 1px solid rgba(139, 0, 255, 0.2);">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);">
+                        <i class="fas fa-times mr-1"></i>Annulla
+                    </button>
                     <?php if ($result_tutte_canzoni->num_rows > 0): ?>
-                        <button type="submit" form="formAggiungiCanzoni" class="btn btn-primary" style="background: #8b00ff">
-                            Aggiungi Canzoni Selezionate
+                        <button type="submit" form="formAggiungiCanzoni" class="btn btn-primary" style="background: linear-gradient(135deg, #8b00ff, #7000d4); border: none; border-radius: 6px;">
+                            <i class="fas fa-plus mr-1"></i>Aggiungi Canzoni Selezionate
                         </button>
                     <?php endif; ?>
                 </div>
@@ -382,19 +444,39 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
         // Aggiorna UI
         document.getElementById('titolo-canzone').textContent = titolo;
         document.getElementById('artista-canzone').textContent = artista;
-        document.getElementById('album-cover').textContent = titolo.charAt(0).toUpperCase();
+        
+        // Aggiorna copertina album
+        const initial = titolo.charAt(0).toUpperCase();
+        document.getElementById('cover-initial').textContent = initial;
+        document.getElementById('cover-image').style.display = 'none';
+        document.getElementById('cover-initial').style.display = 'flex';
         document.getElementById('album-cover').style.background = 'linear-gradient(135deg, #8b00ff, #7000d4)';
     }
     
-    // Funzione per riprodurre tutta la playlist (solo prima canzone per ora)
+    // Funzione per riprodurre tutta la playlist (in ordine)
     function riproduciTuttaPlaylist() {
-        // Per ora riproduci solo la prima canzone nella tabella
-        const primaRiga = document.querySelector('tbody tr');
-        if (primaRiga) {
+        const righe = document.querySelectorAll('tbody tr');
+        if (righe.length > 0) {
+            // Riproduci la prima canzone
+            const primaRiga = righe[0];
             const btnRiproduci = primaRiga.querySelector('button[onclick^="riproduciCanzoneSingola"]');
             if (btnRiproduci) {
-                // Esegue la funzione onclick del bottone
                 eval(btnRiproduci.getAttribute('onclick'));
+                
+                // Quando finisce la prima canzone, passa alla successiva
+                document.getElementById('player').addEventListener('ended', function nextSong() {
+                    const currentRow = document.querySelector('tbody tr td:first-child');
+                    if (currentRow) {
+                        const currentNum = parseInt(currentRow.textContent);
+                        const nextRow = document.querySelector(`tbody tr:nth-child(${currentNum + 1})`);
+                        if (nextRow) {
+                            const nextBtn = nextRow.querySelector('button[onclick^="riproduciCanzoneSingola"]');
+                            if (nextBtn) {
+                                eval(nextBtn.getAttribute('onclick'));
+                            }
+                        }
+                    }
+                });
             } else {
                 alert('Nessuna canzone da riprodurre');
             }
@@ -409,6 +491,18 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
             $('#aggiungiCanzoniModal').modal('show');
         });
     <?php endif; ?>
+    
+    // Migliora l'aspetto delle righe al passaggio del mouse
+    document.querySelectorAll('tbody tr').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = 'rgba(139, 0, 255, 0.08)';
+            this.style.transform = 'translateX(5px)';
+        });
+        row.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+            this.style.transform = '';
+        });
+    });
     </script>
 </body>
 </html>

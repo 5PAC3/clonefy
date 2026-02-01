@@ -1,3 +1,226 @@
+/* NAVBAR FISSA IN ALTO */
+.app-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    margin: 10px;
+    width: calc(100% - 20px);
+}
+
+/* Sposta il contenuto principale sotto la navbar */
+.main-container {
+    position: absolute;
+    top: 70px; /* Altezza navbar + margini */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: calc(100% - 70px);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Rimuovi margin-top dai box interni */
+.underglow-box.full-height {
+    margin-top: 0; /* Era 5px, ora 0 */
+}
+
+/* Migliora i form nella pagina upload */
+.form-control {
+    background: rgba(25, 25, 25, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    padding: 10px 15px;
+}
+
+.form-control:focus {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: rgba(139, 0, 255, 0.6);
+    box-shadow: 0 0 0 3px rgba(139, 0, 255, 0.2);
+}
+
+/* Migliora le card delle playlist */
+.underglow-box.p-3 {
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.underglow-box.p-3:hover {
+    border-color: rgba(139, 0, 255, 0.4);
+    transform: translateY(-5px);
+}
+
+/* Migliora la copertina delle playlist */
+.underglow-box.p-3 .bg-secondary {
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.underglow-box.p-3:hover .bg-secondary {
+    transform: scale(1.02);
+}
+
+/* Header più compatto */
+.content-header {
+    padding: 15px 20px;
+    min-height: auto;
+}
+
+/* Migliora la tabella nella playlist */
+.table-dark {
+    background: rgba(25, 25, 25, 0.8);
+}
+
+.table-dark thead th {
+    border-bottom: 2px solid rgba(139, 0, 255, 0.3);
+    color: #d7a3ff;
+}
+
+.table-dark tbody tr:hover {
+    background: rgba(139, 0, 255, 0.1);
+}
+
+/* Migliora i badge */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, #8b00ff, #7000d4);
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, #333, #444);
+}
+
+/* Alert più eleganti */
+.alert {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 15px;
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.15);
+    color: #28a745;
+    border-left: 4px solid #28a745;
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.15);
+    color: #dc3545;
+    border-left: 4px solid #dc3545;
+}
+
+/* Bottone più prominente per upload */
+.btn[style*="background: #8b00ff"] {
+    background: linear-gradient(135deg, #8b00ff 0%, #7000d4 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-weight: 600;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(139, 0, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn[style*="background: #8b00ff"]:hover {
+    background: linear-gradient(135deg, #9400d3 0%, #8b00ff 100%);
+    box-shadow: 0 6px 20px rgba(139, 0, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Scrollbar più sottile */
+.scrollable-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+/* File input migliorato */
+input[type="file"] {
+    padding: 8px;
+    background: rgba(25, 25, 25, 0.8);
+    border-radius: 8px;
+    color: #fff;
+}
+
+input[type="file"]::file-selector-button {
+    background: linear-gradient(135deg, #333, #444);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 15px;
+    border-radius: 6px;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: linear-gradient(135deg, #444, #555);
+    border-color: rgba(139, 0, 255, 0.3);
+}
+
+/* Modal più scuro */
+.modal-content.bg-dark {
+    background: rgba(18, 18, 18, 0.98) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(139, 0, 255, 0.2);
+}
+
+/* Riduci l'opacità dello sfondo pattern */
+body::before {
+    opacity: 0.3;
+}
+
+/* Player più integrato */
+#player {
+    filter: invert(0) !important;
+    background: rgba(25, 25, 25, 0.8);
+    border-radius: 8px;
+    padding: 5px;
+}
+
+/* Responsive migliorato */
+@media (max-width: 992px) {
+    .main-container {
+        top: 60px;
+        height: calc(100% - 60px);
+        padding: 15px;
+    }
+    
+    .app-navbar {
+        margin: 5px;
+        width: calc(100% - 10px);
+        padding: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        top: 55px;
+        height: calc(100% - 55px);
+        padding: 10px;
+    }
+    
+    .content-header h2 {
+        font-size: 1.4rem;
+    }
+    
+    .content-header p {
+        font-size: 0.9rem;
+    }
+}
+
 /* Reset e impostazioni di base */
 * {
     margin: 0;
