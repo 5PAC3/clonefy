@@ -99,12 +99,60 @@ if (!empty($query)) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
     <!-- Font Awesome per icone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <!-- Bootstrap JS e jQuery per funzionalità audio -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* Stili per il player della pagina di ricerca */
+        #search-player-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: rgba(18, 18, 18, 0.98);
+            border-top: 2px solid #8b00ff;
+            padding: 15px;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        #search-player-container.hidden {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        
+        .now-playing-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        .btn-play-search {
+            transition: all 0.2s ease;
+        }
+        
+        .btn-play-search:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(139, 0, 255, 0.4);
+        }
+        
+        .btn-play-search.playing {
+            background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
+        }
+        
+        .current-song-highlight {
+            border: 2px solid #8b00ff !important;
+            background: rgba(139, 0, 255, 0.05) !important;
+        }
+    </style>
 </head>
 
-<body style="background-color: black">
+<body style="background-color: black; padding-bottom: 120px;"> <!-- Padding per il player fisso -->
     <!-- Navbar con barra di ricerca -->
     <nav class="app-navbar d-flex justify-content-between align-items-center" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; margin: 10px; width: calc(100% - 20px); backdrop-filter: blur(10px); background: rgba(18, 18, 18, 0.95); padding: 10px 20px;">
         <div class="d-flex align-items-center">
@@ -143,6 +191,60 @@ if (!empty($query)) {
             </div>
         </div>
     </nav>
+
+    <!-- PLAYER FISSO IN BASSO (visibile solo quando si riproduce una canzone) -->
+    <div id="search-player-container" class="hidden">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <div class="d-flex align-items-center">
+                        <div id="search-player-cover" class="mr-3" style="width: 50px; height: 50px; border-radius: 8px; background: linear-gradient(135deg, #8b00ff, #7000d4); display: flex; align-items: center; justify-content: center; font-size: 20px; color: white;">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <div>
+                            <div id="search-player-title" class="text-white" style="font-weight: 600; font-size: 0.95rem;">Nessuna canzone in riproduzione</div>
+                            <div id="search-player-artist" class="text-muted" style="font-size: 0.85rem;">Seleziona una canzone dai risultati</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button id="search-player-prev" class="btn btn-link text-white mr-3" style="font-size: 20px;">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button id="search-player-play" class="btn mr-3" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button id="search-player-next" class="btn btn-link text-white ml-3" style="font-size: 20px;">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small id="search-player-current" class="text-muted">0:00</small>
+                            <div class="progress flex-grow-1 mx-2" style="height: 4px; background: rgba(255, 255, 255, 0.1);">
+                                <div id="search-player-progress" class="progress-bar" style="background: #8b00ff; width: 0%;"></div>
+                            </div>
+                            <small id="search-player-duration" class="text-muted">0:00</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 text-right">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <button id="search-player-volume-toggle" class="btn btn-link text-white mr-2">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <div class="volume-slider-container" style="width: 100px;">
+                            <input type="range" id="search-player-volume" min="0" max="100" value="80" class="w-100" style="height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px;">
+                        </div>
+                        <button id="search-player-close" class="btn btn-link text-danger ml-3">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Container principale -->
     <div class="main-container" style="position: absolute; top: 70px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 70px); padding: 20px;">
@@ -189,6 +291,31 @@ if (!empty($query)) {
 
                     <div class="scrollable-content">
                         <?php if (!empty($risultati)): ?>
+                            <!-- VARIABILI PER IL PLAYER -->
+                            <?php
+                            // Prepara dati per JavaScript
+                            $canzoni_json = [];
+                            foreach ($risultati as $index => $canzone) {
+                                $canzoni_json[] = [
+                                    'id' => $canzone['id'],
+                                    'titolo' => $canzone['titolo'],
+                                    'artista' => $canzone['artista'],
+                                    'file_path' => $canzone['file_path'],
+                                    'index' => $index
+                                ];
+                            }
+                            ?>
+                            
+                            <script>
+                            // Variabili globali per il player
+                            var canzoniDisponibili = <?php echo json_encode($canzoni_json); ?>;
+                            var canzoneCorrente = null;
+                            var indiceCorrente = -1;
+                            var audioPlayer = new Audio();
+                            var isPlaying = false;
+                            var volume = 0.8;
+                            </script>
+                            
                             <!-- RISULTATI NEL TITOLO -->
                             <?php if (!empty($risultati_titolo)): ?>
                                 <div class="mb-5">
@@ -199,12 +326,22 @@ if (!empty($query)) {
                                         </span>
                                     </h4>
                                     <div class="row">
-                                        <?php foreach ($risultati_titolo as $canzone): ?>
+                                        <?php foreach ($risultati_titolo as $index => $canzone): ?>
                                             <div class="col-lg-4 col-md-6 mb-4">
-                                                <div class="underglow-box p-3" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
+                                                <div class="underglow-box p-3 song-card" 
+                                                     data-song-id="<?php echo $canzone['id']; ?>"
+                                                     data-song-index="<?php echo $index; ?>"
+                                                     data-song-title="<?php echo htmlspecialchars($canzone['titolo']); ?>"
+                                                     data-song-artist="<?php echo htmlspecialchars($canzone['artista']); ?>"
+                                                     data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>"
+                                                     style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
                                                     <!-- Copertina album -->
-                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc;">
+                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc; position: relative;">
                                                         <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
+                                                        <!-- Indicatore "now playing" -->
+                                                        <div class="now-playing-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(139, 0, 255, 0.3); display: none; align-items: center; justify-content: center; font-size: 40px; color: white;">
+                                                            <i class="fas fa-play-circle"></i>
+                                                        </div>
                                                     </div>
                                                     
                                                     <!-- Info canzone -->
@@ -237,12 +374,18 @@ if (!empty($query)) {
                                                     
                                                     <!-- Azioni -->
                                                     <div class="d-flex justify-content-between align-items-center">
-                                                        <button class="btn btn-sm" 
-                                                                onclick="riproduciCanzone('<?php echo htmlspecialchars($canzone['file_path']); ?>', 
-                                                                        '<?php echo addslashes($canzone['titolo']); ?>', 
-                                                                        '<?php echo addslashes($canzone['artista']); ?>')"
+                                                        <button class="btn btn-sm btn-play-search" 
+                                                                data-song-id="<?php echo $canzone['id']; ?>"
+                                                                data-song-index="<?php echo $index; ?>"
                                                                 style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
                                                             <i class="fas fa-play mr-1"></i>Riproduci
+                                                        </button>
+                                                        
+                                                        <!-- Pulsante pausa (inizialmente nascosto) -->
+                                                        <button class="btn btn-sm btn-pause-search" 
+                                                                data-song-id="<?php echo $canzone['id']; ?>"
+                                                                style="display: none; background: linear-gradient(135deg, #ff4d4d, #ff3333); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                            <i class="fas fa-pause mr-1"></i>Pausa
                                                         </button>
                                                         
                                                         <a href="index.php" class="btn btn-sm" 
@@ -267,12 +410,22 @@ if (!empty($query)) {
                                         </span>
                                     </h4>
                                     <div class="row">
-                                        <?php foreach ($risultati_artista as $canzone): ?>
+                                        <?php foreach ($risultati_artista as $index => $canzone): ?>
                                             <div class="col-lg-4 col-md-6 mb-4">
-                                                <div class="underglow-box p-3" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
+                                                <div class="underglow-box p-3 song-card" 
+                                                     data-song-id="<?php echo $canzone['id']; ?>"
+                                                     data-song-index="<?php echo $index + count($risultati_titolo); ?>"
+                                                     data-song-title="<?php echo htmlspecialchars($canzone['titolo']); ?>"
+                                                     data-song-artist="<?php echo htmlspecialchars($canzone['artista']); ?>"
+                                                     data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>"
+                                                     style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
                                                     <!-- Copertina album -->
-                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc;">
+                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc; position: relative;">
                                                         <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
+                                                        <!-- Indicatore "now playing" -->
+                                                        <div class="now-playing-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(139, 0, 255, 0.3); display: none; align-items: center; justify-content: center; font-size: 40px; color: white;">
+                                                            <i class="fas fa-play-circle"></i>
+                                                        </div>
                                                     </div>
                                                     
                                                     <!-- Info canzone -->
@@ -305,12 +458,18 @@ if (!empty($query)) {
                                                     
                                                     <!-- Azioni -->
                                                     <div class="d-flex justify-content-between align-items-center">
-                                                        <button class="btn btn-sm" 
-                                                                onclick="riproduciCanzone('<?php echo htmlspecialchars($canzone['file_path']); ?>', 
-                                                                        '<?php echo addslashes($canzone['titolo']); ?>', 
-                                                                        '<?php echo addslashes($canzone['artista']); ?>')"
+                                                        <button class="btn btn-sm btn-play-search" 
+                                                                data-song-id="<?php echo $canzone['id']; ?>"
+                                                                data-song-index="<?php echo $index + count($risultati_titolo); ?>"
                                                                 style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
                                                             <i class="fas fa-play mr-1"></i>Riproduci
+                                                        </button>
+                                                        
+                                                        <!-- Pulsante pausa (inizialmente nascosto) -->
+                                                        <button class="btn btn-sm btn-pause-search" 
+                                                                data-song-id="<?php echo $canzone['id']; ?>"
+                                                                style="display: none; background: linear-gradient(135deg, #ff4d4d, #ff3333); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                            <i class="fas fa-pause mr-1"></i>Pausa
                                                         </button>
                                                         
                                                         <a href="index.php" class="btn btn-sm" 
@@ -335,12 +494,22 @@ if (!empty($query)) {
                                         </span>
                                     </h4>
                                     <div class="row">
-                                        <?php foreach ($risultati_genere as $canzone): ?>
+                                        <?php foreach ($risultati_genere as $index => $canzone): ?>
                                             <div class="col-lg-4 col-md-6 mb-4">
-                                                <div class="underglow-box p-3" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
+                                                <div class="underglow-box p-3 song-card" 
+                                                     data-song-id="<?php echo $canzone['id']; ?>"
+                                                     data-song-index="<?php echo $index + count($risultati_titolo) + count($risultati_artista); ?>"
+                                                     data-song-title="<?php echo htmlspecialchars($canzone['titolo']); ?>"
+                                                     data-song-artist="<?php echo htmlspecialchars($canzone['artista']); ?>"
+                                                     data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>"
+                                                     style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
                                                     <!-- Copertina album -->
-                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc;">
+                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc; position: relative;">
                                                         <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
+                                                        <!-- Indicatore "now playing" -->
+                                                        <div class="now-playing-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(139, 0, 255, 0.3); display: none; align-items: center; justify-content: center; font-size: 40px; color: white;">
+                                                            <i class="fas fa-play-circle"></i>
+                                                        </div>
                                                     </div>
                                                     
                                                     <!-- Info canzone -->
@@ -373,12 +542,18 @@ if (!empty($query)) {
                                                     
                                                     <!-- Azioni -->
                                                     <div class="d-flex justify-content-between align-items-center">
-                                                        <button class="btn btn-sm" 
-                                                                onclick="riproduciCanzone('<?php echo htmlspecialchars($canzone['file_path']); ?>', 
-                                                                        '<?php echo addslashes($canzone['titolo']); ?>', 
-                                                                        '<?php echo addslashes($canzone['artista']); ?>')"
+                                                        <button class="btn btn-sm btn-play-search" 
+                                                                data-song-id="<?php echo $canzone['id']; ?>"
+                                                                data-song-index="<?php echo $index + count($risultati_titolo) + count($risultati_artista); ?>"
                                                                 style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
                                                             <i class="fas fa-play mr-1"></i>Riproduci
+                                                        </button>
+                                                        
+                                                        <!-- Pulsante pausa (inizialmente nascosto) -->
+                                                        <button class="btn btn-sm btn-pause-search" 
+                                                                data-song-id="<?php echo $canzone['id']; ?>"
+                                                                style="display: none; background: linear-gradient(135deg, #ff4d4d, #ff3333); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                            <i class="fas fa-pause mr-1"></i>Pausa
                                                         </button>
                                                         
                                                         <a href="index.php" class="btn btn-sm" 
@@ -474,66 +649,294 @@ if (!empty($query)) {
     </div>
 
     <script>
-    // Funzione per riprodurre una canzone
-    function riproduciCanzone(filePath, titolo, artista) {
-        // Usa il player dalla pagina index se esiste
-        if (window.opener && window.opener.riproduciCanzone) {
-            window.opener.riproduciCanzone(filePath, titolo, artista);
-            window.focus();
-        } else {
-            // Se non c'è la finestra padre, prova a riprodurre nella pagina corrente
-            const player = document.getElementById('player');
-            if (player) {
-                const source = document.createElement('source');
-                source.src = filePath;
-                source.type = 'audio/mpeg';
-                
-                while(player.firstChild) {
-                    player.removeChild(player.firstChild);
-                }
-                
-                player.appendChild(source);
-                player.load();
-                player.play();
-                
-                // Aggiorna UI se esistono gli elementi
-                if (document.getElementById('titolo-canzone')) {
-                    document.getElementById('titolo-canzone').textContent = titolo;
-                    document.getElementById('artista-canzone').textContent = artista;
-                }
-                
-                // Notifica all'utente
-                const notifica = document.createElement('div');
-                notifica.style.cssText = 'position:fixed; top:20px; right:20px; background:linear-gradient(135deg, #8b00ff, #7000d4); color:white; padding:12px 20px; border-radius:8px; z-index:9999; box-shadow:0 4px 15px rgba(0,0,0,0.3);';
-                notifica.innerHTML = '<i class="fas fa-play mr-2"></i>Riproduzione: ' + titolo;
-                document.body.appendChild(notifica);
-                
-                setTimeout(() => notifica.remove(), 3000);
-            } else {
-                alert("Canzone selezionata: " + titolo + " - " + artista + "\n\nTorna alla home per riprodurla.");
-            }
-        }
-    }
+    // ==============================
+    // SISTEMA DI RIPRODUZIONE AUDIO
+    // ==============================
     
-    // Focus automatico sulla barra di ricerca quando la pagina si carica
     $(document).ready(function() {
+        // Focus sulla barra di ricerca
         $('input[name="q"]').focus();
         $('input[name="q"]').select();
         
-        // Se c'è una query, scrolla leggermente in basso per vedere i risultati
-        if ($('input[name="q"]').val().length > 0) {
-            setTimeout(() => {
-                $('.scrollable-content').scrollTop(0);
-            }, 100);
+        // ===================
+        // FUNZIONI DEL PLAYER
+        // ===================
+        
+        // Mostra/nascondi player
+        function mostraPlayer() {
+            $('#search-player-container').removeClass('hidden');
+            $('body').css('padding-bottom', '120px');
         }
+        
+        function nascondiPlayer() {
+            $('#search-player-container').addClass('hidden');
+            $('body').css('padding-bottom', '0');
+        }
+        
+        // Riproduci una canzone specifica
+        function riproduciCanzone(indice) {
+            if (indice >= 0 && indice < canzoniDisponibili.length) {
+                const canzone = canzoniDisponibili[indice];
+                canzoneCorrente = canzone;
+                indiceCorrente = indice;
+                
+                // Aggiorna UI
+                $('#search-player-title').text(canzone.titolo);
+                $('#search-player-artist').text(canzone.artista);
+                $('#search-player-cover').html('<i class="fas fa-music"></i>');
+                
+                // Imposta e riproduci audio
+                audioPlayer.src = canzone.file_path;
+                audioPlayer.volume = volume;
+                audioPlayer.play();
+                
+                // Aggiorna controlli
+                $('#search-player-play').html('<i class="fas fa-pause"></i>');
+                isPlaying = true;
+                
+                // Mostra player
+                mostraPlayer();
+                
+                // Evidenzia la card della canzone corrente
+                $('.song-card').removeClass('current-song-highlight');
+                $('.now-playing-overlay').hide();
+                $('.btn-play-search').show();
+                $('.btn-pause-search').hide();
+                $('.btn-play-search').removeClass('playing');
+                
+                $(`.song-card[data-song-id="${canzone.id}"]`).addClass('current-song-highlight');
+                $(`.song-card[data-song-id="${canzone.id}"] .now-playing-overlay`).show();
+                $(`.song-card[data-song-id="${canzone.id}"] .btn-play-search`).hide();
+                $(`.song-card[data-song-id="${canzone.id}"] .btn-pause-search`).show();
+                $(`.song-card[data-song-id="${canzone.id}"] .btn-play-search`).addClass('playing');
+                
+                // Scroll alla canzone se non è visibile
+                const card = $(`.song-card[data-song-id="${canzone.id}"]`);
+                if (card.length) {
+                    const cardOffset = card.offset().top;
+                    const scrollableContent = $('.scrollable-content');
+                    const scrollTop = scrollableContent.scrollTop();
+                    const contentHeight = scrollableContent.height();
+                    
+                    if (cardOffset < scrollTop || cardOffset > scrollTop + contentHeight - 200) {
+                        scrollableContent.animate({
+                            scrollTop: cardOffset - 100
+                        }, 500);
+                    }
+                }
+            }
+        }
+        
+        // Pausa/riproduci
+        function togglePlayPause() {
+            if (canzoneCorrente) {
+                if (isPlaying) {
+                    audioPlayer.pause();
+                    $('#search-player-play').html('<i class="fas fa-play"></i>');
+                } else {
+                    audioPlayer.play();
+                    $('#search-player-play').html('<i class="fas fa-pause"></i>');
+                }
+                isPlaying = !isPlaying;
+            }
+        }
+        
+        // Canzone successiva
+        function prossimaCanzone() {
+            if (indiceCorrente < canzoniDisponibili.length - 1) {
+                riproduciCanzone(indiceCorrente + 1);
+            } else {
+                riproduciCanzone(0); // Torna alla prima
+            }
+        }
+        
+        // Canzone precedente
+        function canzonePrecedente() {
+            if (indiceCorrente > 0) {
+                riproduciCanzone(indiceCorrente - 1);
+            } else {
+                riproduciCanzone(canzoniDisponibili.length - 1); // Vai all'ultima
+            }
+        }
+        
+        // Formatta secondi in MM:SS
+        function formattaTempo(secondi) {
+            const min = Math.floor(secondi / 60);
+            const sec = Math.floor(secondi % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+        
+        // ===================
+        // EVENT LISTENERS
+        // ===================
+        
+        // Click su "Riproduci" nelle card
+        $(document).on('click', '.btn-play-search', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const songId = $(this).data('song-id');
+            const songIndex = $(this).data('song-index');
+            
+            if (songId === canzoneCorrente?.id && isPlaying) {
+                // Se è la stessa canzone già in riproduzione, metti in pausa
+                audioPlayer.pause();
+                isPlaying = false;
+                $(this).hide();
+                $(this).siblings('.btn-pause-search').show();
+                $('#search-player-play').html('<i class="fas fa-play"></i>');
+            } else {
+                // Riproduci la canzone selezionata
+                riproduciCanzone(songIndex);
+            }
+        });
+        
+        // Click su "Pausa" nelle card
+        $(document).on('click', '.btn-pause-search', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            audioPlayer.pause();
+            isPlaying = false;
+            $(this).hide();
+            $(this).siblings('.btn-play-search').show();
+            $('#search-player-play').html('<i class="fas fa-play"></i>');
+        });
+        
+        // Controlli del player fisso
+        $('#search-player-play').click(function() {
+            togglePlayPause();
+        });
+        
+        $('#search-player-next').click(function() {
+            prossimaCanzone();
+        });
+        
+        $('#search-player-prev').click(function() {
+            canzonePrecedente();
+        });
+        
+        $('#search-player-close').click(function() {
+            if (audioPlayer) {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+                isPlaying = false;
+            }
+            nascondiPlayer();
+            $('.song-card').removeClass('current-song-highlight');
+            $('.now-playing-overlay').hide();
+            $('.btn-play-search').show();
+            $('.btn-pause-search').hide();
+            $('.btn-play-search').removeClass('playing');
+        });
+        
+        // Volume
+        $('#search-player-volume').on('input', function() {
+            volume = $(this).val() / 100;
+            if (audioPlayer) {
+                audioPlayer.volume = volume;
+            }
+            
+            // Cambia icona volume
+            const icon = $('#search-player-volume-toggle i');
+            if (volume === 0) {
+                icon.removeClass('fa-volume-up fa-volume-down').addClass('fa-volume-mute');
+            } else if (volume < 0.5) {
+                icon.removeClass('fa-volume-up fa-volume-mute').addClass('fa-volume-down');
+            } else {
+                icon.removeClass('fa-volume-down fa-volume-mute').addClass('fa-volume-up');
+            }
+        });
+        
+        $('#search-player-volume-toggle').click(function() {
+            if (volume > 0) {
+                // Muto
+                $('#search-player-volume').val(0).trigger('input');
+            } else {
+                // Torna al 50%
+                $('#search-player-volume').val(50).trigger('input');
+            }
+        });
+        
+        // ===================
+        // EVENTI AUDIO
+        // ===================
+        
+        // Aggiorna progress bar
+        audioPlayer.addEventListener('timeupdate', function() {
+            if (audioPlayer.duration) {
+                const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                $('#search-player-progress').css('width', percent + '%');
+                
+                $('#search-player-current').text(formattaTempo(audioPlayer.currentTime));
+                $('#search-player-duration').text(formattaTempo(audioPlayer.duration));
+            }
+        });
+        
+        // Canzone finita
+        audioPlayer.addEventListener('ended', function() {
+            // Riproduci automaticamente la prossima canzone
+            prossimaCanzone();
+        });
+        
+        // Click sulla progress bar per saltare
+        $('#search-player-progress').parent().click(function(e) {
+            const progressBar = $(this);
+            const clickPosition = e.pageX - progressBar.offset().left;
+            const progressBarWidth = progressBar.width();
+            const percent = (clickPosition / progressBarWidth);
+            
+            if (audioPlayer.duration) {
+                audioPlayer.currentTime = audioPlayer.duration * percent;
+            }
+        });
+        
+        // Tasti da tastiera
+        $(document).keydown(function(e) {
+            // Spazio per play/pause
+            if (e.keyCode === 32 && !$(e.target).is('input, textarea')) {
+                e.preventDefault();
+                togglePlayPause();
+            }
+            // Freccia sinistra per precedente
+            else if (e.keyCode === 37) {
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 10);
+                }
+            }
+            // Freccia destra per successiva
+            else if (e.keyCode === 39) {
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 10);
+                }
+            }
+        });
+        
+        // ===================
+        // UTILITY
+        // ===================
+        
+        // Funzione per evidenziare testo cercato
+        function evidenziaTesto(testo, query) {
+            if (!query) return testo;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return testo.replace(regex, '<mark style="background: rgba(139, 0, 255, 0.3); color: #fff; padding: 1px 4px; border-radius: 3px;">$1</mark>');
+        }
+        
+        // Applica evidenziazione alle card
+        <?php if (!empty($query)): ?>
+            const searchQuery = "<?php echo addslashes($query); ?>";
+            $('.song-card h5').each(function() {
+                const originalText = $(this).text();
+                const highlighted = evidenziaTesto(originalText, searchQuery);
+                if (highlighted !== originalText) {
+                    $(this).html(highlighted);
+                }
+            });
+        <?php endif; ?>
     });
-    
-    // Evidenzia il testo cercato nei risultati (opzionale)
-    function evidenziaTesto(testo, query) {
-        if (!query) return testo;
-        const regex = new RegExp(`(${query})`, 'gi');
-        return testo.replace(regex, '<mark style="background: rgba(139, 0, 255, 0.3); color: #fff; padding: 1px 4px; border-radius: 3px;">$1</mark>');
-    }
     </script>
 </body>
 </html>
