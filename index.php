@@ -60,12 +60,30 @@ if (isset($_GET['error'])) {
 
 <body style="background-color: black">
     <!-- Navbar FISSA -->
-    <nav class="app-navbar d-flex justify-content-between" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; margin: 10px; width: calc(100% - 20px); backdrop-filter: blur(10px); background: rgba(18, 18, 18, 0.95);">
-        <div>
-            <a href="index.php" class="active"><i class="fas fa-home mr-1"></i> Home</a>
-            <a href="upload.php"><i class="fas fa-upload mr-1"></i> Carica Canzone</a>
-            
+    <!-- SOSTITUISCI la navbar esistente con questa: -->
+    <nav class="app-navbar d-flex justify-content-between align-items-center" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; margin: 10px; width: calc(100% - 20px); backdrop-filter: blur(10px); background: rgba(18, 18, 18, 0.95); padding: 10px 20px;">
+        <div class="d-flex align-items-center">
+            <a href="index.php" class="active"><i class="fas fa-home mr-2"></i> Home</a>
+            <a href="upload.php" class="ml-3"><i class="fas fa-upload mr-1"></i> Carica Canzone</a>
         </div>
+        
+        <!-- Barra di ricerca -->
+        <div class="search-container" style="flex: 0 0 400px; max-width: 400px;">
+            <form method="GET" action="cerca.php" class="d-flex">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" 
+                        placeholder="Cerca canzoni..." 
+                        style="background: rgba(25, 25, 25, 0.9); color: #fff; border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 8px 0 0 8px; padding: 8px 15px;"
+                        value="<?php echo isset($_GET['q']) ? htmlspecialchars($_GET['q']) : ''; ?>">
+                    <div class="input-group-append">
+                        <button class="btn" type="submit" style="background: rgba(139, 0, 255, 0.3); color: #fff; border: 1px solid rgba(139, 0, 255, 0.4); border-radius: 0 8px 8px 0; padding: 8px 20px;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
         <div class="dropdown">
             <button class="btn btn-link text-white" type="button" data-toggle="dropdown" 
                     style="font-size: 24px; padding: 0 10px; background: transparent; border: none;">
