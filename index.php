@@ -64,9 +64,7 @@ if (isset($_GET['error'])) {
         <div>
             <a href="index.php" class="active"><i class="fas fa-home mr-1"></i> Home</a>
             <a href="upload.php"><i class="fas fa-upload mr-1"></i> Carica Canzone</a>
-            <div>
-              <a href="logout.php" class="text-danger"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a>
-            </div>
+            
         </div>
         <div class="dropdown">
             <button class="btn btn-link text-white" type="button" data-toggle="dropdown" 
@@ -74,8 +72,8 @@ if (isset($_GET['error'])) {
                 <i class="fas fa-ellipsis-v"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right bg-dark border border-secondary" style="min-width: 180px;">
-                <a class="dropdown-item text-white" href="#"><i class="fas fa-user mr-2"></i>Profilo</a>
-                <a class="dropdown-item text-white" href="#"><i class="fas fa-cog mr-2"></i>Impostazioni</a>
+                <a class="dropdown-item text-white" href="profilo.php"><i class="fas fa-user mr-2"></i>Profilo</a>
+                <a class="dropdown-item text-white" href="impostazioni.php"><i class="fas fa-cog mr-2"></i>Impostazioni</a>
                 <div class="dropdown-divider border-secondary"></div>
                 <a class="dropdown-item text-danger" href="logout.php"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
             </div>
