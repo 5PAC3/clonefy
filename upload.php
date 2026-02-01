@@ -158,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <div class="mb-4">
                                 <label class="form-label" style="color: #d7a3ff; font-weight: 500; margin-bottom: 8px;">
-                                    <i class="fas fa-heading mr-2"></i>Titolo *
+                                    <i class="fas fa-heading mr-2"></i> Titolo *
                                 </label>
                                 <input type="text" name="titolo" class="form-control" required 
                                        value="<?php echo htmlspecialchars($titolo ?? ''); ?>"
@@ -167,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <div class="mb-4">
                                 <label class="form-label" style="color: #d7a3ff; font-weight: 500; margin-bottom: 8px;">
-                                    <i class="fas fa-user mr-2"></i>Artista *
+                                    <i class="fas fa-user mr-2"></i> Artista *
                                 </label>
                                 <input type="text" name="artista" class="form-control" required
                                        value="<?php echo htmlspecialchars($artista ?? ''); ?>"
@@ -177,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="row">
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label" style="color: #d7a3ff; font-weight: 500; margin-bottom: 8px;">
-                                        <i class="fas fa-guitar mr-2"></i>Genere
+                                        <i class="fas fa-guitar mr-2"></i> Genere
                                     </label>
                                     <input type="text" name="genere" class="form-control" 
                                            value="<?php echo htmlspecialchars($genere ?? ''); ?>"
@@ -186,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label" style="color: #d7a3ff; font-weight: 500; margin-bottom: 8px;">
-                                        <i class="fas fa-calendar-alt mr-2"></i>Anno
+                                        <i class="fas fa-calendar-alt mr-2"></i> Anno
                                     </label>
                                     <input type="number" name="anno" class="form-control" 
                                            min="1900" max="<?php echo date('Y'); ?>"
@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <div class="mb-4">
                                 <label class="form-label" style="color: #d7a3ff; font-weight: 500; margin-bottom: 8px;">
-                                    <i class="fas fa-music mr-2"></i>File Audio *
+                                    <i class="fas fa-music mr-2"></i> File Audio *
                                 </label>
                                 <div class="file-upload-area">
                                     <input type="file" name="audio" id="audioFile" class="form-control" 
