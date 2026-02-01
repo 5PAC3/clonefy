@@ -13,23 +13,70 @@ $risultati = [];
 $messaggio = '';
 
 if (!empty($query)) {
-    // Preparazione della query di ricerca (cerca in titolo, artista e genere)
+    // Preparazione della query di ricerca con ORDINE DI PRIORITÀ
     $search_query = "%" . $query . "%";
+    
+    // Query UNICA con priorità: 1. titolo, 2. artista, 3. genere
     $stmt = $conn->prepare("
-        SELECT s.*, u.username as caricato_da 
+        SELECT s.*, u.username as caricato_da,
+               CASE 
+                   WHEN s.titolo LIKE ? THEN 1
+                   WHEN s.artista LIKE ? THEN 2
+                   WHEN s.genere LIKE ? THEN 3
+               END as priorita,
+               CASE 
+                   WHEN s.titolo LIKE ? THEN 'titolo'
+                   WHEN s.artista LIKE ? THEN 'artista'
+                   WHEN s.genere LIKE ? THEN 'genere'
+               END as tipo_risultato
         FROM songs s
         LEFT JOIN users u ON s.user_id = u.id
-        WHERE (s.titolo LIKE ? OR s.artista LIKE ? OR s.genere LIKE ?)
-        ORDER BY s.titolo ASC
+        WHERE s.titolo LIKE ? OR s.artista LIKE ? OR s.genere LIKE ?
+        ORDER BY priorita ASC, s.titolo ASC
     ");
-    $stmt->bind_param("sss", $search_query, $search_query, $search_query);
+    
+    // Bind parameters (9 parametri totali)
+    $stmt->bind_param("sssssssss", 
+        $search_query,  // CASE titolo (priorita)
+        $search_query,  // CASE artista (priorita)  
+        $search_query,  // CASE genere (priorita)
+        $search_query,  // CASE titolo (tipo_risultato)
+        $search_query,  // CASE artista (tipo_risultato)
+        $search_query,  // CASE genere (tipo_risultato)
+        $search_query,  // WHERE titolo
+        $search_query,  // WHERE artista
+        $search_query   // WHERE genere
+    );
+    
     $stmt->execute();
     $result = $stmt->get_result();
     
     if ($result->num_rows > 0) {
+        // Raggruppa risultati per tipo per la visualizzazione
+        $risultati_titolo = [];
+        $risultati_artista = [];
+        $risultati_genere = [];
+        
         while ($row = $result->fetch_assoc()) {
-            $risultati[] = $row;
+            switch ($row['priorita']) {
+                case 1:
+                    $risultati_titolo[] = $row;
+                    break;
+                case 2:
+                    $risultati_artista[] = $row;
+                    break;
+                case 3:
+                    $risultati_genere[] = $row;
+                    break;
+            }
+            $risultati[] = $row; // Tutti i risultati insieme
         }
+        
+        // Contatori per le categorie
+        $conteggio_titolo = count($risultati_titolo);
+        $conteggio_artista = count($risultati_artista);
+        $conteggio_genere = count($risultati_genere);
+        
     } else {
         $messaggio = "Nessun risultato trovato per: <strong>" . htmlspecialchars($query) . "</strong>";
     }
@@ -116,7 +163,18 @@ if (!empty($query)) {
                                 <p class="text-muted mb-0">
                                     <?php 
                                     if (!empty($risultati)) {
-                                        echo count($risultati) . " risultato" . (count($risultati) != 1 ? 'i' : '') . " trovato" . (count($risultati) != 1 ? 'i' : '');
+                                        $totale = count($risultati);
+                                        echo $totale . " risultato" . ($totale != 1 ? 'i' : '') . " trovato" . ($totale != 1 ? 'i' : '');
+                                        
+                                        if (!empty($conteggio_titolo) || !empty($conteggio_artista) || !empty($conteggio_genere)) {
+                                            echo ' (';
+                                            $parti = [];
+                                            if ($conteggio_titolo > 0) $parti[] = $conteggio_titolo . ' nel titolo';
+                                            if ($conteggio_artista > 0) $parti[] = $conteggio_artista . ' nell\'artista';
+                                            if ($conteggio_genere > 0) $parti[] = $conteggio_genere . ' nel genere';
+                                            echo implode(', ', $parti);
+                                            echo ')';
+                                        }
                                     } elseif (!empty($messaggio)) {
                                         echo $messaggio;
                                     }
@@ -131,70 +189,235 @@ if (!empty($query)) {
 
                     <div class="scrollable-content">
                         <?php if (!empty($risultati)): ?>
-                            <div class="row">
-                                <?php foreach ($risultati as $canzone): ?>
-                                    <div class="col-lg-4 col-md-6 mb-4">
-                                        <div class="underglow-box p-3" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
-                                            <!-- Copertina album -->
-                                            <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc;">
-                                                <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
-                                            </div>
-                                            
-                                            <!-- Info canzone -->
-                                            <h5 style="color: #fff; margin-bottom: 5px;"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
-                                            <p class="text-muted mb-2">
-                                                <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
-                                            </p>
-                                            
-                                            <?php if ($canzone['genere']): ?>
-                                                <div class="mb-3">
-                                                    <span class="badge" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border-radius: 20px; padding: 4px 12px;">
-                                                        <?php echo htmlspecialchars($canzone['genere']); ?>
-                                                    </span>
+                            <!-- RISULTATI NEL TITOLO -->
+                            <?php if (!empty($risultati_titolo)): ?>
+                                <div class="mb-5">
+                                    <h4 style="color: #d7a3ff; border-bottom: 2px solid #8b00ff; padding-bottom: 8px; margin-bottom: 20px;">
+                                        <i class="fas fa-heading mr-2"></i>Canzoni con nome corrispondente
+                                        <span class="badge ml-2" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; padding: 4px 10px; border-radius: 12px;">
+                                            <?php echo $conteggio_titolo; ?>
+                                        </span>
+                                    </h4>
+                                    <div class="row">
+                                        <?php foreach ($risultati_titolo as $canzone): ?>
+                                            <div class="col-lg-4 col-md-6 mb-4">
+                                                <div class="underglow-box p-3" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
+                                                    <!-- Copertina album -->
+                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc;">
+                                                        <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
+                                                    </div>
+                                                    
+                                                    <!-- Info canzone -->
+                                                    <h5 style="color: #fff; margin-bottom: 5px;"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
+                                                    <p class="text-muted mb-2">
+                                                        <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
+                                                    </p>
+                                                    
+                                                    <?php if ($canzone['genere']): ?>
+                                                        <div class="mb-3">
+                                                            <span class="badge" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border-radius: 20px; padding: 4px 12px;">
+                                                                <?php echo htmlspecialchars($canzone['genere']); ?>
+                                                            </span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Anno -->
+                                                    <?php if ($canzone['anno']): ?>
+                                                        <p class="text-muted mb-2">
+                                                            <i class="fas fa-calendar-alt mr-1"></i>Anno: <?php echo htmlspecialchars($canzone['anno']); ?>
+                                                        </p>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Caricato da -->
+                                                    <p class="text-muted mb-3">
+                                                        <small>
+                                                            <i class="fas fa-upload mr-1"></i>Caricata da: <?php echo htmlspecialchars($canzone['caricato_da']); ?>
+                                                        </small>
+                                                    </p>
+                                                    
+                                                    <!-- Azioni -->
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <button class="btn btn-sm" 
+                                                                onclick="riproduciCanzone('<?php echo htmlspecialchars($canzone['file_path']); ?>', 
+                                                                        '<?php echo addslashes($canzone['titolo']); ?>', 
+                                                                        '<?php echo addslashes($canzone['artista']); ?>')"
+                                                                style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                            <i class="fas fa-play mr-1"></i>Riproduci
+                                                        </button>
+                                                        
+                                                        <a href="index.php" class="btn btn-sm" 
+                                                           style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 6px 12px;">
+                                                            <i class="fas fa-list-music mr-1"></i>Playlist
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            <?php endif; ?>
-                                            
-                                            <!-- Anno -->
-                                            <?php if ($canzone['anno']): ?>
-                                                <p class="text-muted mb-2">
-                                                    <i class="fas fa-calendar-alt mr-1"></i>Anno: <?php echo htmlspecialchars($canzone['anno']); ?>
-                                                </p>
-                                            <?php endif; ?>
-                                            
-                                            <!-- Caricato da -->
-                                            <p class="text-muted mb-3">
-                                                <small>
-                                                    <i class="fas fa-upload mr-1"></i>Caricata da: <?php echo htmlspecialchars($canzone['caricato_da']); ?>
-                                                </small>
-                                            </p>
-                                            
-                                            <!-- Azioni SEMPLICI: solo Riproduci -->
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <button class="btn btn-sm" 
-                                                        onclick="riproduciCanzone('<?php echo htmlspecialchars($canzone['file_path']); ?>', 
-                                                                '<?php echo addslashes($canzone['titolo']); ?>', 
-                                                                '<?php echo addslashes($canzone['artista']); ?>')"
-                                                        style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
-                                                    <i class="fas fa-play mr-1"></i>Riproduci
-                                                </button>
-                                                
-                                                <!-- Link alla home per gestire playlist -->
-                                                <a href="index.php" class="btn btn-sm" 
-                                                   style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 6px 12px;">
-                                                    <i class="fas fa-list-music mr-1"></i>Playlist
-                                                </a>
                                             </div>
-                                        </div>
+                                        <?php endforeach; ?>
                                     </div>
-                                <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- RISULTATI NELL'ARTISTA -->
+                            <?php if (!empty($risultati_artista)): ?>
+                                <div class="mb-5">
+                                    <h4 style="color: #d7a3ff; border-bottom: 2px solid #8b00ff; padding-bottom: 8px; margin-bottom: 20px;">
+                                        <i class="fas fa-user mr-2"></i>Artisti corrispondenti
+                                        <span class="badge ml-2" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; padding: 4px 10px; border-radius: 12px;">
+                                            <?php echo $conteggio_artista; ?>
+                                        </span>
+                                    </h4>
+                                    <div class="row">
+                                        <?php foreach ($risultati_artista as $canzone): ?>
+                                            <div class="col-lg-4 col-md-6 mb-4">
+                                                <div class="underglow-box p-3" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
+                                                    <!-- Copertina album -->
+                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc;">
+                                                        <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
+                                                    </div>
+                                                    
+                                                    <!-- Info canzone -->
+                                                    <h5 style="color: #fff; margin-bottom: 5px;"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
+                                                    <p class="text-muted mb-2">
+                                                        <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
+                                                    </p>
+                                                    
+                                                    <?php if ($canzone['genere']): ?>
+                                                        <div class="mb-3">
+                                                            <span class="badge" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border-radius: 20px; padding: 4px 12px;">
+                                                                <?php echo htmlspecialchars($canzone['genere']); ?>
+                                                            </span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Anno -->
+                                                    <?php if ($canzone['anno']): ?>
+                                                        <p class="text-muted mb-2">
+                                                            <i class="fas fa-calendar-alt mr-1"></i>Anno: <?php echo htmlspecialchars($canzone['anno']); ?>
+                                                        </p>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Caricato da -->
+                                                    <p class="text-muted mb-3">
+                                                        <small>
+                                                            <i class="fas fa-upload mr-1"></i>Caricata da: <?php echo htmlspecialchars($canzone['caricato_da']); ?>
+                                                        </small>
+                                                    </p>
+                                                    
+                                                    <!-- Azioni -->
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <button class="btn btn-sm" 
+                                                                onclick="riproduciCanzone('<?php echo htmlspecialchars($canzone['file_path']); ?>', 
+                                                                        '<?php echo addslashes($canzone['titolo']); ?>', 
+                                                                        '<?php echo addslashes($canzone['artista']); ?>')"
+                                                                style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                            <i class="fas fa-play mr-1"></i>Riproduci
+                                                        </button>
+                                                        
+                                                        <a href="index.php" class="btn btn-sm" 
+                                                           style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 6px 12px;">
+                                                            <i class="fas fa-list-music mr-1"></i>Playlist
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- RISULTATI NEL GENERE -->
+                            <?php if (!empty($risultati_genere)): ?>
+                                <div class="mb-5">
+                                    <h4 style="color: #d7a3ff; border-bottom: 2px solid #8b00ff; padding-bottom: 8px; margin-bottom: 20px;">
+                                        <i class="fas fa-guitar mr-2"></i>Generi corrispondenti
+                                        <span class="badge ml-2" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; padding: 4px 10px; border-radius: 12px;">
+                                            <?php echo $conteggio_genere; ?>
+                                        </span>
+                                    </h4>
+                                    <div class="row">
+                                        <?php foreach ($risultati_genere as $canzone): ?>
+                                            <div class="col-lg-4 col-md-6 mb-4">
+                                                <div class="underglow-box p-3" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
+                                                    <!-- Copertina album -->
+                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc;">
+                                                        <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
+                                                    </div>
+                                                    
+                                                    <!-- Info canzone -->
+                                                    <h5 style="color: #fff; margin-bottom: 5px;"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
+                                                    <p class="text-muted mb-2">
+                                                        <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
+                                                    </p>
+                                                    
+                                                    <?php if ($canzone['genere']): ?>
+                                                        <div class="mb-3">
+                                                            <span class="badge" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border-radius: 20px; padding: 4px 12px;">
+                                                                <?php echo htmlspecialchars($canzone['genere']); ?>
+                                                            </span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Anno -->
+                                                    <?php if ($canzone['anno']): ?>
+                                                        <p class="text-muted mb-2">
+                                                            <i class="fas fa-calendar-alt mr-1"></i>Anno: <?php echo htmlspecialchars($canzone['anno']); ?>
+                                                        </p>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Caricato da -->
+                                                    <p class="text-muted mb-3">
+                                                        <small>
+                                                            <i class="fas fa-upload mr-1"></i>Caricata da: <?php echo htmlspecialchars($canzone['caricato_da']); ?>
+                                                        </small>
+                                                    </p>
+                                                    
+                                                    <!-- Azioni -->
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <button class="btn btn-sm" 
+                                                                onclick="riproduciCanzone('<?php echo htmlspecialchars($canzone['file_path']); ?>', 
+                                                                        '<?php echo addslashes($canzone['titolo']); ?>', 
+                                                                        '<?php echo addslashes($canzone['artista']); ?>')"
+                                                                style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                            <i class="fas fa-play mr-1"></i>Riproduci
+                                                        </button>
+                                                        
+                                                        <a href="index.php" class="btn btn-sm" 
+                                                           style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 6px 12px;">
+                                                            <i class="fas fa-list-music mr-1"></i>Playlist
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- Info box per l'ordine dei risultati -->
+                            <div class="alert alert-info mt-4" style="background: rgba(139, 0, 255, 0.1); border-left: 4px solid #8b00ff; border-radius: 8px;">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-sort-amount-down mr-3" style="font-size: 24px; color: #8b00ff;"></i>
+                                    <div>
+                                        <strong>Ordine dei risultati:</strong><br>
+                                        <small class="text-muted">
+                                            1. Canzoni con nome corrispondente → 
+                                            2. Canzoni dell'artista corrispondente → 
+                                            3. Canzoni del genere corrispondente
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- Info box per aggiungere a playlist -->
-                            <div class="alert alert-info mt-4" style="background: rgba(139, 0, 255, 0.1); border-left: 4px solid #8b00ff; border-radius: 8px;">
+                            <div class="alert alert-dark mt-3" style="background: rgba(30, 30, 30, 0.8); border-left: 4px solid #555; border-radius: 8px;">
                                 <i class="fas fa-info-circle mr-2"></i>
                                 <strong>Vuoi aggiungere una canzone a una playlist?</strong><br>
-                                Vai nelle tue <a href="index.php" style="color: #d7a3ff; font-weight: 500;">playlist</a>, selezionane una e usa il pulsante "Aggiungi Canzoni".
+                                <small class="text-muted">
+                                    Vai nelle tue <a href="index.php" style="color: #d7a3ff; font-weight: 500;">playlist</a>, 
+                                    selezionane una e usa il pulsante "Aggiungi Canzoni" per scegliere tra tutte le canzoni disponibili.
+                                </small>
                             </div>
+                            
                         <?php elseif (!empty($messaggio)): ?>
                             <div class="text-center py-5">
                                 <div class="mb-4" style="font-size: 64px; color: rgba(139, 0, 255, 0.3);">
@@ -212,26 +435,32 @@ if (!empty($query)) {
                                     <i class="fas fa-search"></i>
                                 </div>
                                 <h5 class="text-muted mb-2">Cerca tra le canzoni</h5>
-                                <p class="text-muted mb-4">Usa la barra di ricerca in alto per trovare canzoni per titolo, artista o genere</p>
+                                <p class="text-muted mb-4">Usa la barra di ricerca in alto per trovare canzoni</p>
                                 <div class="row mt-4">
                                     <div class="col-md-4 mb-3">
-                                        <div class="underglow-box p-3">
-                                            <i class="fas fa-heading mb-2" style="font-size: 24px; color: #8b00ff;"></i>
-                                            <h6>Titolo</h6>
+                                        <div class="underglow-box p-3" style="height: 100%;">
+                                            <div class="mb-3" style="font-size: 32px; color: #8b00ff;">
+                                                <i class="fas fa-heading"></i>
+                                            </div>
+                                            <h5>Titolo</h5>
                                             <small class="text-muted">Cerca per nome della canzone</small>
                                         </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
-                                        <div class="underglow-box p-3">
-                                            <i class="fas fa-user mb-2" style="font-size: 24px; color: #8b00ff;"></i>
-                                            <h6>Artista</h6>
+                                        <div class="underglow-box p-3" style="height: 100%;">
+                                            <div class="mb-3" style="font-size: 32px; color: #8b00ff;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <h5>Artista</h5>
                                             <small class="text-muted">Cerca per nome dell'artista</small>
                                         </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
-                                        <div class="underglow-box p-3">
-                                            <i class="fas fa-guitar mb-2" style="font-size: 24px; color: #8b00ff;"></i>
-                                            <h6>Genere</h6>
+                                        <div class="underglow-box p-3" style="height: 100%;">
+                                            <div class="mb-3" style="font-size: 32px; color: #8b00ff;">
+                                                <i class="fas fa-guitar"></i>
+                                            </div>
+                                            <h5>Genere</h5>
                                             <small class="text-muted">Cerca per genere musicale</small>
                                         </div>
                                     </div>
@@ -273,7 +502,13 @@ if (!empty($query)) {
                     document.getElementById('artista-canzone').textContent = artista;
                 }
                 
-                alert("Riproduzione in corso: " + titolo + " - " + artista);
+                // Notifica all'utente
+                const notifica = document.createElement('div');
+                notifica.style.cssText = 'position:fixed; top:20px; right:20px; background:linear-gradient(135deg, #8b00ff, #7000d4); color:white; padding:12px 20px; border-radius:8px; z-index:9999; box-shadow:0 4px 15px rgba(0,0,0,0.3);';
+                notifica.innerHTML = '<i class="fas fa-play mr-2"></i>Riproduzione: ' + titolo;
+                document.body.appendChild(notifica);
+                
+                setTimeout(() => notifica.remove(), 3000);
             } else {
                 alert("Canzone selezionata: " + titolo + " - " + artista + "\n\nTorna alla home per riprodurla.");
             }
@@ -284,7 +519,21 @@ if (!empty($query)) {
     $(document).ready(function() {
         $('input[name="q"]').focus();
         $('input[name="q"]').select();
+        
+        // Se c'è una query, scrolla leggermente in basso per vedere i risultati
+        if ($('input[name="q"]').val().length > 0) {
+            setTimeout(() => {
+                $('.scrollable-content').scrollTop(0);
+            }, 100);
+        }
     });
+    
+    // Evidenzia il testo cercato nei risultati (opzionale)
+    function evidenziaTesto(testo, query) {
+        if (!query) return testo;
+        const regex = new RegExp(`(${query})`, 'gi');
+        return testo.replace(regex, '<mark style="background: rgba(139, 0, 255, 0.3); color: #fff; padding: 1px 4px; border-radius: 3px;">$1</mark>');
+    }
     </script>
 </body>
 </html>
