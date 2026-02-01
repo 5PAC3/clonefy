@@ -1,5 +1,5 @@
 <?php
-  if(!isset($_SESSION))
+if(!isset($_SESSION))
     session_start();    
 
 require_once 'conn.php';
@@ -9,8 +9,11 @@ require_once 'auth.php';
 $conn = new mysqli($host, $user, $db_password, $database);
 $user_id = $_SESSION['id'];
 
+// Parametro di ricerca playlist
+$search_playlist = isset($_GET['search_playlist']) ? trim($_GET['search_playlist']) : '';
+
 // Query: playlist di cui l'utente è proprietario O collaboratore
-$query = "SELECT p.id, p.nome, p.descrizione, p.user_id as proprietario_id, 
+$query_base = "SELECT p.id, p.nome, p.descrizione, p.user_id as proprietario_id, 
                  u.username as proprietario_nome,
                  COUNT(ps.song_id) as num_canzoni,
                  CASE 
@@ -21,12 +24,29 @@ $query = "SELECT p.id, p.nome, p.descrizione, p.user_id as proprietario_id,
           LEFT JOIN playlist_songs ps ON p.id = ps.playlist_id 
           LEFT JOIN users u ON p.user_id = u.id
           WHERE p.user_id = ? 
-             OR p.id IN (SELECT playlist_id FROM user_playlist_membership WHERE user_id = ?)
-          GROUP BY p.id 
-          ORDER BY p.created_at DESC";
-          
-$stmt = $conn->prepare($query);
-$stmt->bind_param("iii", $user_id, $user_id, $user_id);
+             OR p.id IN (SELECT playlist_id FROM user_playlist_membership WHERE user_id = ?)";
+
+// Aggiungi filtro ricerca se presente
+$params = [$user_id, $user_id, $user_id];
+$param_types = "iii";
+
+if (!empty($search_playlist)) {
+    $query_base .= " AND (p.nome LIKE ? OR p.descrizione LIKE ?)";
+    $search_term = "%" . $search_playlist . "%";
+    $params[] = $search_term;
+    $params[] = $search_term;
+    $param_types .= "ss";
+}
+
+$query_base .= " GROUP BY p.id ORDER BY p.created_at DESC";
+
+$stmt = $conn->prepare($query_base);
+
+// Bind dinamico dei parametri
+if (count($params) > 0) {
+    $stmt->bind_param($param_types, ...$params);
+}
+
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -59,22 +79,21 @@ if (isset($_GET['error'])) {
 </head>
 
 <body style="background-color: black">
-    <!-- Navbar FISSA -->
-    <!-- SOSTITUISCI la navbar esistente con questa: -->
+    <!-- Navbar FISSA con ricerca canzoni -->
     <nav class="app-navbar d-flex justify-content-between align-items-center" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; margin: 10px; width: calc(100% - 20px); backdrop-filter: blur(10px); background: rgba(18, 18, 18, 0.95); padding: 10px 20px;">
         <div class="d-flex align-items-center">
             <a href="index.php" class="active"><i class="fas fa-home mr-2"></i> Home</a>
             <a href="upload.php" class="ml-3"><i class="fas fa-upload mr-1"></i> Carica Canzone</a>
         </div>
         
-        <!-- Barra di ricerca -->
+        <!-- Barra di ricerca CANZONI -->
         <div class="search-container" style="flex: 0 0 400px; max-width: 400px;">
             <form method="GET" action="cerca.php" class="d-flex">
                 <div class="input-group">
                     <input type="text" name="q" class="form-control" 
-                        placeholder="Cerca canzoni..." 
-                        style="background: rgba(25, 25, 25, 0.9); color: #fff; border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 8px 0 0 8px; padding: 8px 15px;"
-                        value="<?php echo isset($_GET['q']) ? htmlspecialchars($_GET['q']) : ''; ?>">
+                           placeholder="Cerca canzoni..." 
+                           style="background: rgba(25, 25, 25, 0.9); color: #fff; border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 8px 0 0 8px; padding: 8px 15px;"
+                           value="<?php echo isset($_GET['q']) ? htmlspecialchars($_GET['q']) : ''; ?>">
                     <div class="input-group-append">
                         <button class="btn" type="submit" style="background: rgba(139, 0, 255, 0.3); color: #fff; border: 1px solid rgba(139, 0, 255, 0.4); border-radius: 0 8px 8px 0; padding: 8px 20px;">
                             <i class="fas fa-search"></i>
@@ -148,8 +167,9 @@ if (isset($_GET['error'])) {
             <!-- SINISTRA: 75% Playlist -->
             <div class="main-col">
                 <div class="underglow-box full-height">
-                    <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
-                        <div class="d-flex justify-content-between align-items-center">
+                    <!-- HEADER CON RICERCA PLAYLIST -->
+                    <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2); padding-bottom: 15px;">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
                                 <h2 style="color: #d7a3ff; margin: 0;"><i class="fas fa-list-music mr-2"></i>Le tue Playlist</h2>
                                 <p class="text-muted mb-0">
@@ -161,6 +181,42 @@ if (isset($_GET['error'])) {
                                 <i class="fas fa-plus mr-1"></i>Nuova Playlist
                             </button>
                         </div>
+                        
+                        <!-- Barra di ricerca PLAYLIST -->
+                        <div class="search-playlist-container">
+                            <form method="GET" action="" class="d-flex align-items-center">
+                                <div class="input-group" style="max-width: 400px;">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" style="background: rgba(25, 25, 25, 0.9); color: #8b00ff; border: 1px solid rgba(139, 0, 255, 0.3); border-right: none; border-radius: 8px 0 0 8px;">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" name="search_playlist" id="searchPlaylistInput" class="form-control" 
+                                           placeholder="Cerca tra le tue playlist..." 
+                                           style="background: rgba(25, 25, 25, 0.9); color: #fff; border: 1px solid rgba(139, 0, 255, 0.3); border-left: none; border-radius: 0 8px 8px 0; padding: 8px 15px;"
+                                           value="<?php echo htmlspecialchars($search_playlist); ?>">
+                                    <?php if (!empty($search_playlist)): ?>
+                                        <div class="input-group-append">
+                                            <a href="index.php" class="btn" style="background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.3); border-radius: 0 8px 8px 0; padding: 8px 15px;">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <?php if (!empty($search_playlist)): ?>
+                                    <div class="ml-3">
+                                        <span class="badge" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border-radius: 20px; padding: 6px 12px; font-weight: 500;">
+                                            <i class="fas fa-filter mr-1"></i>
+                                            Filtro: "<?php echo htmlspecialchars($search_playlist); ?>"
+                                            <span class="ml-1" style="background: rgba(139, 0, 255, 0.4); padding: 2px 8px; border-radius: 10px;">
+                                                <?php echo $result->num_rows; ?>
+                                            </span>
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+                            </form>
+                        </div>
                     </div>
 
                     <div class="scrollable-content">
@@ -170,11 +226,24 @@ if (isset($_GET['error'])) {
                             </div>
                         <?php endif; ?>
                         
+                        <!-- Messaggio se la ricerca non ha risultati -->
+                        <?php if (!empty($search_playlist) && $result->num_rows === 0): ?>
+                            <div class="alert alert-info mb-4" style="border-left: 4px solid #8b00ff; background: rgba(139, 0, 255, 0.1); border-radius: 8px;">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Nessuna playlist trovata con: <strong>"<?php echo htmlspecialchars($search_playlist); ?>"</strong>
+                                <div class="mt-2">
+                                    <a href="index.php" class="btn btn-sm" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border: 1px solid rgba(139, 0, 255, 0.3);">
+                                        <i class="fas fa-times mr-1"></i>Rimuovi filtro
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
                         <div class="row">
                             <?php if ($result->num_rows > 0): ?>
                                 <?php while ($playlist = $result->fetch_assoc()): ?>
                                     <div class="col-lg-6 mb-3">
-                                        <div class="underglow-box p-3" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
+                                        <div class="underglow-box p-3 playlist-card" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
                                             <!-- Badge ruolo -->
                                             <div class="d-flex align-items-center mb-2 flex-wrap">
                                                 <?php if ($playlist['ruolo'] == 'proprietario'): ?>
@@ -317,6 +386,14 @@ if (isset($_GET['error'])) {
     <?php if (isset($_GET['error']) && $_GET['error'] == 'nome_vuoto'): ?>
         $(document).ready(function() {
             $('#creaPlaylistModal').modal('show');
+        });
+    <?php endif; ?>
+    
+    // Focus sulla ricerca playlist se c'è una ricerca
+    <?php if (!empty($search_playlist)): ?>
+        $(document).ready(function() {
+            $('#searchPlaylistInput').focus();
+            $('#searchPlaylistInput').select();
         });
     <?php endif; ?>
     </script>
