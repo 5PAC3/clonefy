@@ -74,8 +74,50 @@ if (isset($_GET['error'])) {
     <!-- Font Awesome per icone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Bootstrap JS per dropdown -->
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .cover-loading {
+            position: relative;
+        }
+        
+        .cover-loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .cover-loading.loading::after {
+            content: '🔄';
+        }
+        
+        .cover-loading.error::after {
+            content: '🎵';
+            background: linear-gradient(135deg, #8b00ff, #7000d4);
+        }
+        
+        .song-playing {
+            border: 2px solid #8b00ff !important;
+            box-shadow: 0 0 15px rgba(139, 0, 255, 0.5) !important;
+        }
+        
+        .song-playing .play-btn {
+            background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
+        }
+        
+        .play-btn.playing {
+            background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
+        }
+    </style>
 </head>
 
 <body style="background-color: black">
@@ -241,7 +283,28 @@ if (isset($_GET['error'])) {
                         
                         <div class="row">
                             <?php if ($result->num_rows > 0): ?>
+                                <?php 
+                                // Prima, otteniamo tutte le canzoni per poter mostrare la prima come esempio
+                                $playlist_canzoni_query = "SELECT s.id, s.titolo, s.artista, s.copertina 
+                                                          FROM songs s 
+                                                          INNER JOIN playlist_songs ps ON s.id = ps.song_id 
+                                                          WHERE ps.playlist_id = ? 
+                                                          LIMIT 1";
+                                $stmt_canzoni = $conn->prepare($playlist_canzoni_query);
+                                ?>
+                                
                                 <?php while ($playlist = $result->fetch_assoc()): ?>
+                                    <?php
+                                    // Ottieni la prima canzone della playlist per la copertina
+                                    $prima_canzone = null;
+                                    $stmt_canzoni->bind_param("i", $playlist['id']);
+                                    $stmt_canzoni->execute();
+                                    $result_canzoni = $stmt_canzoni->get_result();
+                                    if ($result_canzoni->num_rows > 0) {
+                                        $prima_canzone = $result_canzoni->fetch_assoc();
+                                    }
+                                    ?>
+                                    
                                     <div class="col-lg-6 mb-3">
                                         <div class="underglow-box p-3 playlist-card" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
                                             <!-- Badge ruolo -->
@@ -262,8 +325,21 @@ if (isset($_GET['error'])) {
                                                 <?php endif; ?>
                                             </div>
                                             
-                                            <div class="mb-3" style="height: 150px; border-radius: 8px; background: linear-gradient(135deg, #333, #444); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc;">
-                                                <?php echo strtoupper(substr($playlist['nome'], 0, 1)); ?>
+                                            <!-- Copertina dalla prima canzone -->
+                                            <div class="mb-3" style="height: 150px; border-radius: 8px; overflow: hidden; position: relative; background: linear-gradient(135deg, #333, #444);">
+                                                <?php if ($prima_canzone && $prima_canzone['copertina']): ?>
+                                                    <img src="extract_cover.php?song_id=<?php echo $prima_canzone['id']; ?>" 
+                                                         alt="Copertina"
+                                                         style="width: 100%; height: 100%; object-fit: cover;"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <?php endif; ?>
+                                                
+                                                <!-- Fallback: iniziale o icona -->
+                                                <div style="display: <?php echo ($prima_canzone && $prima_canzone['copertina']) ? 'none' : 'flex'; ?>; 
+                                                     align-items: center; justify-content: center; width: 100%; height: 100%; 
+                                                     font-size: 48px; color: #ccc;">
+                                                    <?php echo strtoupper(substr($playlist['nome'], 0, 1)); ?>
+                                                </div>
                                             </div>
                                             
                                             <h5 style="color: #fff; margin-bottom: 5px;"><?php echo htmlspecialchars($playlist['nome']); ?></h5>
@@ -284,6 +360,7 @@ if (isset($_GET['error'])) {
                                         </div>
                                     </div>
                                 <?php endwhile; ?>
+                                <?php $stmt_canzoni->close(); ?>
                             <?php else: ?>
                                 <div class="col-12">
                                     <div class="text-center py-5">
@@ -310,11 +387,23 @@ if (isset($_GET['error'])) {
                         <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-play-circle mr-2"></i>Riproduzione</h3>
                     </div>
                     <div class="scrollable-content text-center">
-                        <!-- Copertina -->
-                        <div id="album-cover" class="mx-auto mb-4" 
-                             style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc; border-radius: 12px; background: linear-gradient(135deg, #222, #333); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); overflow: hidden;">
-                            <div id="cover-initial" style="font-size: 72px;">♫</div>
-                            <img id="cover-image" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                        <!-- Copertina DINAMICA dal MP3 -->
+                        <div id="album-cover" class="mx-auto mb-4 cover-loading" 
+                             style="width: 180px; height: 180px; border-radius: 12px; 
+                                    background: linear-gradient(135deg, #222, #333); 
+                                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); 
+                                    overflow: hidden;">
+                            
+                            <!-- Immagine copertina (dinamica dal MP3) -->
+                            <img id="cover-image" src="" 
+                                 style="width: 100%; height: 100%; object-fit: cover; display: none;"
+                                 onerror="this.style.display='none'; document.getElementById('cover-initial').style.display='flex';">
+                            
+                            <!-- Iniziale (fallback quando non c'è copertina) -->
+                            <div id="cover-initial" 
+                                 style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 72px; color: #ccc;">
+                                ♫
+                            </div>
                         </div>
                         
                         <!-- Info canzone -->
@@ -328,14 +417,14 @@ if (isset($_GET['error'])) {
                         
                         <!-- Controlli aggiuntivi -->
                         <div class="d-flex justify-content-center mb-4">
-                            <button class="btn btn-sm mr-2" onclick="document.getElementById('player').currentTime -= 10" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
+                            <button class="btn btn-sm mr-2" onclick="skipBackward()" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
                                 <i class="fas fa-backward mr-1"></i>10s
                             </button>
-                            <button class="btn btn-sm mr-2" onclick="document.getElementById('player').play()" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 8px 20px;">
+                            <button id="play-btn" class="btn btn-sm mr-2" onclick="togglePlay()" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 8px 20px;">
                                 <i class="fas fa-play mr-1"></i>Play
                             </button>
-                            <button class="btn btn-sm" onclick="document.getElementById('player').pause()" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
-                                <i class="fas fa-pause mr-1"></i>Pausa
+                            <button class="btn btn-sm" onclick="skipForward()" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
+                                <i class="fas fa-forward mr-1"></i>10s
                             </button>
                         </div>
                         
@@ -357,12 +446,31 @@ if (isset($_GET['error'])) {
     </div>
 
     <script>
-    function riproduciCanzone(filePath, titolo, artista) {
+    // Variabili globali
+    let currentSongId = null;
+    let isPlaying = false;
+    
+    // Funzione per riprodurre una canzone CON COPERTINA DAL MP3
+    function riproduciCanzone(filePath, titolo, artista, songId) {
         const player = document.getElementById('player');
+        
+        // Controlla se è la stessa canzone già in riproduzione
+        if (currentSongId === songId && isPlaying) {
+            player.pause();
+            isPlaying = false;
+            document.getElementById('play-btn').innerHTML = '<i class="fas fa-play mr-1"></i>Play';
+            document.getElementById('play-btn').classList.remove('playing');
+            return;
+        }
+        
+        // Se è una canzone diversa, caricala
+        currentSongId = songId;
+        
         const source = document.createElement('source');
         source.src = filePath;
         source.type = 'audio/mpeg';
         
+        // Rimuovi vecchie sorgenti
         while(player.firstChild) {
             player.removeChild(player.firstChild);
         }
@@ -371,16 +479,111 @@ if (isset($_GET['error'])) {
         player.load();
         player.play();
         
+        // Aggiorna UI
         document.getElementById('titolo-canzone').textContent = titolo;
         document.getElementById('artista-canzone').textContent = artista;
+        document.getElementById('play-btn').innerHTML = '<i class="fas fa-pause mr-1"></i>Pausa';
+        document.getElementById('play-btn').classList.add('playing');
+        isPlaying = true;
         
-        // Aggiorna copertina album
-        const initial = titolo.charAt(0).toUpperCase();
-        document.getElementById('cover-initial').textContent = initial;
-        document.getElementById('cover-image').style.display = 'none';
-        document.getElementById('cover-initial').style.display = 'flex';
-        document.getElementById('album-cover').style.background = 'linear-gradient(135deg, #8b00ff, #7000d4)';
+        // CARICA LA COPERTINA DAL MP3
+        loadAlbumCover(songId, titolo);
+        
+        // Aggiorna stato player quando la canzone finisce
+        player.onended = function() {
+            isPlaying = false;
+            document.getElementById('play-btn').innerHTML = '<i class="fas fa-play mr-1"></i>Play';
+            document.getElementById('play-btn').classList.remove('playing');
+        };
     }
+    
+    // Funzione per caricare la copertina dal MP3 tramite PHP
+    function loadAlbumCover(songId, titolo) {
+        const albumCover = document.getElementById('album-cover');
+        const coverImage = document.getElementById('cover-image');
+        const coverInitial = document.getElementById('cover-initial');
+        
+        // Mostra loader
+        albumCover.classList.add('loading');
+        coverInitial.style.display = 'none';
+        coverImage.style.display = 'none';
+        
+        // Imposta la copertina con timestamp per evitare cache
+        const coverUrl = 'extract_cover.php?song_id=' + songId + '&t=' + new Date().getTime();
+        
+        // Precarica l'immagine
+        const img = new Image();
+        img.onload = function() {
+            // Quando l'immagine è caricata, mostrala
+            albumCover.classList.remove('loading');
+            coverImage.src = coverUrl;
+            coverImage.style.display = 'block';
+            coverInitial.style.display = 'none';
+        };
+        
+        img.onerror = function() {
+            // Se non c'è copertina, mostra iniziale
+            albumCover.classList.remove('loading');
+            albumCover.classList.add('error');
+            coverImage.style.display = 'none';
+            coverInitial.textContent = titolo.charAt(0).toUpperCase();
+            coverInitial.style.display = 'flex';
+            
+            // Rimuovi classe error dopo 2 secondi
+            setTimeout(() => {
+                albumCover.classList.remove('error');
+            }, 2000);
+        };
+        
+        img.src = coverUrl;
+    }
+    
+    // Funzioni di controllo player
+    function togglePlay() {
+        const player = document.getElementById('player');
+        const playBtn = document.getElementById('play-btn');
+        
+        if (player.paused) {
+            player.play();
+            playBtn.innerHTML = '<i class="fas fa-pause mr-1"></i>Pausa';
+            playBtn.classList.add('playing');
+            isPlaying = true;
+        } else {
+            player.pause();
+            playBtn.innerHTML = '<i class="fas fa-play mr-1"></i>Play';
+            playBtn.classList.remove('playing');
+            isPlaying = false;
+        }
+    }
+    
+    function skipBackward() {
+        const player = document.getElementById('player');
+        player.currentTime = Math.max(0, player.currentTime - 10);
+    }
+    
+    function skipForward() {
+        const player = document.getElementById('player');
+        player.currentTime = Math.min(player.duration, player.currentTime + 10);
+    }
+    
+    // Listener per tasti da tastiera
+    document.addEventListener('keydown', function(e) {
+        // Spazio per play/pause
+        if (e.code === 'Space' && !e.target.matches('input, textarea, button')) {
+            e.preventDefault();
+            togglePlay();
+        }
+        // Freccia sinistra per indietro
+        if (e.code === 'ArrowLeft' && e.ctrlKey) {
+            e.preventDefault();
+            skipBackward();
+        }
+        // Freccia destra per avanti
+        if (e.code === 'ArrowRight' && e.ctrlKey) {
+            e.preventDefault();
+            skipForward();
+        }
+    });
     
     // Mostra automaticamente il modal se c'è un errore
     <?php if (isset($_GET['error']) && $_GET['error'] == 'nome_vuoto'): ?>
@@ -396,6 +599,23 @@ if (isset($_GET['error'])) {
             $('#searchPlaylistInput').select();
         });
     <?php endif; ?>
+    
+    // Ricerca in tempo reale per playlist (JavaScript)
+    $(document).ready(function() {
+        $('#searchPlaylistInput').on('keyup', function() {
+            const searchTerm = $(this).val().toLowerCase();
+            $('.playlist-card').each(function() {
+                const title = $(this).find('h5').text().toLowerCase();
+                const description = $(this).find('p.text-muted').text().toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    $(this).closest('.col-lg-6').show();
+                } else {
+                    $(this).closest('.col-lg-6').hide();
+                }
+            });
+        });
+    });
     </script>
 </body>
 </html>

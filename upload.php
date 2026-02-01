@@ -13,6 +13,43 @@ session_start();
 require_once 'auth.php';
 require_once 'conn.php';
 
+function extractCoverDuringUpload($filepath, $song_id) {
+    require_once('getid3/getid3.php');
+    $getID3 = new getID3();
+    
+    try {
+        $fileInfo = $getID3->analyze($filepath);
+        getid3_lib::CopyTagsToComments($fileInfo);
+        
+        if (isset($fileInfo['comments']['picture'][0])) {
+            $picture = $fileInfo['comments']['picture'][0];
+            
+            // Determina estensione
+            $mime = $picture['image_mime'];
+            $extension = 'jpg';
+            if (strpos($mime, 'png') !== false) $extension = 'png';
+            elseif (strpos($mime, 'gif') !== false) $extension = 'gif';
+            
+            // Crea directory
+            $cover_dir = 'copertine/' . substr(md5($song_id), 0, 2);
+            if (!is_dir($cover_dir)) {
+                mkdir($cover_dir, 0755, true);
+            }
+            
+            $cover_path = $cover_dir . '/' . $song_id . '.' . $extension;
+            
+            // Salva l'immagine
+            if (file_put_contents($cover_path, $picture['data'])) {
+                return $cover_path;
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Errore estrazione copertina upload: " . $e->getMessage());
+    }
+    
+    return null;
+}
+
 $errori = [];
 $successo = false;
 
@@ -65,8 +102,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param("sssssi", $titolo, $artista, $genere, $anno, $percorso_completo, $user_id);
                 
                 if ($stmt->execute()) {
+                    $song_id = $conn->insert_id;
+                    
+                    // Estrai e salva copertina
+                    $cover_path = extractCoverDuringUpload($percorso_completo, $song_id);
+                    
+                    if ($cover_path) {
+                        // Aggiorna il database con il percorso della copertina
+                        $update = $conn->prepare("UPDATE songs SET copertina = ? WHERE id = ?");
+                        $update->bind_param("si", $cover_path, $song_id);
+                        $update->execute();
+                        $update->close();
+                    }
+                    
                     $successo = true;
-                } else {
+                }else {
                     $errori[] = "Errore nel salvataggio nel database";
                 }
                 $conn->close();
@@ -92,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errori[] = "Nessun file audio selezionato";
     }
 }
+
 ?>
 
 <!DOCTYPE html>
