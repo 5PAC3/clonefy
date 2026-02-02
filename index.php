@@ -58,6 +58,14 @@ if (isset($_GET['success']) && $_GET['success'] == 'playlist_creata') {
 if (isset($_GET['error'])) {
     $messaggio = '<div class="alert alert-danger" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-exclamation-triangle mr-2"></i>Errore: ' . htmlspecialchars($_GET['error']) . '</div>';
 }
+
+// Aggiungi questi nuovi messaggi di errore:
+if (isset($_GET['error']) && $_GET['error'] == 'nome_troppo_lungo') {
+    $messaggio = '<div class="alert alert-danger" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-exclamation-triangle mr-2"></i>Il nome della playlist non può superare 100 caratteri</div>';
+}
+if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
+    $messaggio = '<div class="alert alert-danger" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-exclamation-triangle mr-2"></i>La descrizione è troppo lunga</div>';
+}
 ?>
 
 <!DOCTYPE html>
@@ -174,6 +182,7 @@ if (isset($_GET['error'])) {
                         <div class="form-group">
                             <label class="text-white">Nome Playlist *</label>
                             <input type="text" name="nome" class="form-control" required 
+                                   maxlength="100"
                                    placeholder="Nome della playlist" style="background: rgba(25, 25, 25, 0.9); color: #fff; border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 8px; padding: 10px;">
                         </div>
                         <div class="form-group">
@@ -306,7 +315,7 @@ if (isset($_GET['error'])) {
                                     ?>
                                     
                                     <div class="col-lg-6 mb-3">
-                                        <div class="underglow-box p-3 playlist-card" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
+                                        <div class="underglow-box p-3 playlist-card" style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%; display: flex; flex-direction: column;">
                                             <!-- Badge ruolo -->
                                             <div class="d-flex align-items-center mb-2 flex-wrap">
                                                 <?php if ($playlist['ruolo'] == 'proprietario'): ?>
@@ -342,20 +351,41 @@ if (isset($_GET['error'])) {
                                                 </div>
                                             </div>
                                             
-                                            <h5 style="color: #fff; margin-bottom: 5px;"><?php echo htmlspecialchars($playlist['nome']); ?></h5>
-                                            
-                                            <?php if ($playlist['descrizione']): ?>
-                                                <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 5px;"><?php echo htmlspecialchars($playlist['descrizione']); ?></p>
-                                            <?php endif; ?>
-                                            
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">
-                                                    <i class="fas fa-music mr-1"></i><?php echo $playlist['num_canzoni']; ?> canzoni
-                                                </small>
-                                                <a href="playlist.php?id=<?php echo $playlist['id']; ?>" 
-                                                   class="btn btn-sm" style="background: rgba(139, 0, 255, 0.1); color: #d7a3ff; border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 6px; padding: 5px 15px;">
-                                                    <i class="fas fa-external-link-alt mr-1"></i>Apri
-                                                </a>
+                                            <!-- MODIFICA QUI: TITOLO E DESCRIZIONE CON TEXT-OVERFLOW -->
+                                            <div style="flex-grow: 1; display: flex; flex-direction: column; min-height: 0;">
+                                                <h5 style="color: #fff; margin-bottom: 5px; 
+                                                           white-space: nowrap; 
+                                                           overflow: hidden; 
+                                                           text-overflow: ellipsis;
+                                                           flex-shrink: 0;">
+                                                    <?php echo htmlspecialchars($playlist['nome']); ?>
+                                                </h5>
+                                                
+                                                <?php if ($playlist['descrizione']): ?>
+                                                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 5px;
+                                                              display: -webkit-box;
+                                                              -webkit-line-clamp: 2;
+                                                              -webkit-box-orient: vertical;
+                                                              overflow: hidden;
+                                                              text-overflow: ellipsis;
+                                                              line-height: 1.3;
+                                                              max-height: 2.6em;
+                                                              flex-grow: 1;">
+                                                        <?php echo htmlspecialchars($playlist['descrizione']); ?>
+                                                    </p>
+                                                <?php else: ?>
+                                                    <div style="flex-grow: 1;"></div>
+                                                <?php endif; ?>
+                                                
+                                                <div class="d-flex justify-content-between align-items-center" style="flex-shrink: 0;">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-music mr-1"></i><?php echo $playlist['num_canzoni']; ?> canzoni
+                                                    </small>
+                                                    <a href="playlist.php?id=<?php echo $playlist['id']; ?>" 
+                                                       class="btn btn-sm" style="background: rgba(139, 0, 255, 0.1); color: #d7a3ff; border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 6px; padding: 5px 15px;">
+                                                        <i class="fas fa-external-link-alt mr-1"></i>Apri
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -616,6 +646,72 @@ if (isset($_GET['error'])) {
             });
         });
     });
+    
+    // AGGIUNGI QUESTO SCRIPT PER VALIDAZIONE PLAYLIST:
+    $(document).ready(function() {
+        $('#creaPlaylistModal').on('shown.bs.modal', function () {
+            const nomeInput = $('input[name="nome"]');
+            const form = $('#formCreaPlaylist');
+            const submitBtn = form.find('button[type="submit"]');
+            
+            // Contatore caratteri
+            const counter = $('<small class="text-muted d-block mt-1">Caratteri: <span>0</span>/100</small>');
+            nomeInput.after(counter);
+            
+            nomeInput.on('input', function() {
+                const length = $(this).val().length;
+                counter.find('span').text(length);
+                
+                if (length > 100) {
+                    counter.css('color', '#dc3545');
+                    submitBtn.prop('disabled', true);
+                } else if (length === 0) {
+                    counter.css('color', '#6c757d');
+                    submitBtn.prop('disabled', true);
+                } else {
+                    counter.css('color', '#6c757d');
+                    submitBtn.prop('disabled', false);
+                }
+            });
+            
+            // Trigger evento per aggiornare contatore iniziale
+            nomeInput.trigger('input');
+            
+            // Validazione submit form
+            form.on('submit', function(e) {
+                const nomeValue = nomeInput.val().trim();
+                if (nomeValue.length === 0) {
+                    e.preventDefault();
+                    alert('Il nome della playlist è obbligatorio');
+                    return false;
+                }
+                if (nomeValue.length > 100) {
+                    e.preventDefault();
+                    alert('Il nome della playlist non può superare 100 caratteri');
+                    return false;
+                }
+                return true;
+            });
+        });
+        
+        // Resetta quando il modal viene chiuso
+        $('#creaPlaylistModal').on('hidden.bs.modal', function () {
+            $('input[name="nome"]').val('').off('input');
+            $('textarea[name="descrizione"]').val('');
+            $('input[name="is_pubblica"]').prop('checked', false);
+            $('small.text-muted').filter(function() {
+                return $(this).text().includes('Caratteri:');
+            }).remove();
+        });
+        
+        // Mostra modal anche per errori di lunghezza
+        <?php if (isset($_GET['error']) && ($_GET['error'] == 'nome_troppo_lungo' || $_GET['error'] == 'descrizione_troppo_lunga')): ?>
+            $(document).ready(function() {
+                $('#creaPlaylistModal').modal('show');
+            });
+        <?php endif; ?>
+    });
+    // FINE SCRIPT VALIDAZIONE
     </script>
 </body>
 </html>

@@ -768,3 +768,41 @@ audio {
     display: block !important; /* Forza la visualizzazione */
     filter: invert(100%); /* Lo rende bianco se il browser lo fa nero */
 }
+
+/* Fade per nomi lunghi delle playlist */
+.playlist-card h5 {
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 30px; /* Spazio per il fade */
+}
+
+.playlist-card h5::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(18, 18, 18, 0.95));
+    pointer-events: none;
+}
+
+/* Anche per le descrizioni */
+.playlist-card .text-muted {
+    position: relative;
+    overflow: hidden;
+    max-height: 2.6em;
+    line-height: 1.3;
+}
+
+.playlist-card .text-muted::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 1.3em;
+    background: linear-gradient(to right, transparent, rgba(18, 18, 18, 0.95));
+    pointer-events: none;
+}
