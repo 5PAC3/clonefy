@@ -149,6 +149,164 @@ if (!empty($query)) {
             border: 2px solid #8b00ff !important;
             background: rgba(139, 0, 255, 0.05) !important;
         }
+        
+        /* Stili per card quadrate compatte */
+        .song-card-squared {
+            border-radius: 10px;
+            overflow: hidden;
+            height: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            padding: 10px;
+        }
+
+        .song-cover-container {
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* Contenitore quadrato 1:1 */
+            overflow: hidden;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .song-cover-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            background: linear-gradient(135deg, #333, #444); /* Sfondo di fallback */
+        }
+
+        .song-cover-fallback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none; /* Di default nascosto */
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #333, #444);
+            color: #ccc;
+            font-size: 32px; /* Ridotto da 48px */
+            font-weight: bold;
+        }
+        
+        .now-playing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(139, 0, 255, 0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            z-index: 2;
+        }
+        
+        .song-info {
+            padding: 0 5px 10px 5px;
+        }
+
+        .song-title {
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 1.2em;
+        }
+
+        .song-artist {
+            color: #aaa;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .song-genre {
+            display: inline-block;
+            background: rgba(139, 0, 255, 0.2);
+            color: #d7a3ff;
+            border-radius: 10px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            margin-bottom: 8px;
+        }
+        
+        .song-artist {
+            color: #aaa;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+        
+        .song-genre {
+            display: inline-block;
+            background: rgba(139, 0, 255, 0.2);
+            color: #d7a3ff;
+            border-radius: 12px;
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            margin-bottom: 10px;
+        }
+        
+        .song-meta {
+            color: #777;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .song-uploader {
+            color: #666;
+            font-size: 0.75rem;
+            margin-bottom: 15px;
+        }
+        
+        .song-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5px 10px 5px;
+        }
+
+        .song-actions .btn-sm {
+            padding: 4px 8px !important;
+            font-size: 0.8rem !important;
+        }
+        
+        /* Responsività per schermi più piccoli */
+        @media (max-width: 768px) {
+            .col-lg-4 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+            
+            .song-title {
+                font-size: 0.95rem;
+            }
+            
+            .song-artist {
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .col-lg-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -339,74 +497,53 @@ if (!empty($query)) {
                                     </h4>
                                     <div class="row">
                                         <?php foreach ($risultati_titolo as $index => $canzone): ?>
-                                            <div class="col-lg-4 col-md-6 mb-4">
-                                                <div class="underglow-box p-3 song-card" 
+                                            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                                                <div class="underglow-box song-card-squared song-card"
                                                      data-song-id="<?php echo $canzone['id']; ?>"
                                                      data-song-index="<?php echo $index; ?>"
                                                      data-song-title="<?php echo htmlspecialchars($canzone['titolo']); ?>"
                                                      data-song-artist="<?php echo htmlspecialchars($canzone['artista']); ?>"
-                                                     data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>"
-                                                     style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
-                                                    <!-- Copertina album -->
-                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; overflow: hidden; position: relative;">
+                                                     data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>">
+                                                    
+                                                    <!-- Contenitore copertina quadrato -->
+                                                    <div class="song-cover-container">
                                                         <!-- Copertina dal MP3 -->
                                                         <img src="extract_cover.php?song_id=<?php echo $canzone['id']; ?>"
-                                                             style="width: 100%; height: 100%; object-fit: cover;"
-                                                             onerror="this.onerror=null; this.style.display='none';
-                                                                      this.nextElementSibling.style.display='flex';"
-                                                             alt="Copertina di <?php echo htmlspecialchars($canzone['titolo']); ?>">
-
+                                                            class="song-cover-image"
+                                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                                            alt="Copertina di <?php echo htmlspecialchars($canzone['titolo']); ?>">
+                                                        
                                                         <!-- Fallback: iniziale -->
-                                                        <div style="display: flex; align-items: center; justify-content: center;
-                                                                    width: 100%; height: 100%;
-                                                                    background: linear-gradient(135deg, #333, #444);
-                                                                    font-size: 48px; color: #ccc;">
+                                                        <div class="song-cover-fallback">
                                                             <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
                                                         </div>
+                                                        
                                                         <!-- Indicatore "now playing" -->
-                                                        <div class="now-playing-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(139, 0, 255, 0.3); display: none; align-items: center; justify-content: center; font-size: 40px; color: white;">
+                                                        <div class="now-playing-overlay">
                                                             <i class="fas fa-play-circle"></i>
                                                         </div>
                                                     </div>
                                                     
                                                     <!-- Info canzone -->
-                                                    <h5 style="color: #fff; margin-bottom: 5px;"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
-                                                    <p class="text-muted mb-2">
-                                                        <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
-                                                    </p>
-                                                    
-                                                    <?php if ($canzone['genere']): ?>
-                                                        <div class="mb-3">
-                                                            <span class="badge" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border-radius: 20px; padding: 4px 12px;">
-                                                                <?php echo htmlspecialchars($canzone['genere']); ?>
-                                                            </span>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                    
-                                                    <!-- Anno -->
-                                                    <?php if ($canzone['anno']): ?>
-                                                        <p class="text-muted mb-2">
-                                                            <i class="fas fa-calendar-alt mr-1"></i>Anno: <?php echo htmlspecialchars($canzone['anno']); ?>
+                                                    <div class="song-info">
+                                                        <h5 class="song-title"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
+                                                        <p class="song-artist">
+                                                            <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
                                                         </p>
-                                                    <?php endif; ?>
-                                                    
-                                                    <!-- Caricato da -->
-                                                    <p class="text-muted mb-3">
-                                                        <small>
-                                                            <i class="fas fa-upload mr-1"></i>Caricata da: <?php echo htmlspecialchars($canzone['caricato_da']); ?>
-                                                        </small>
-                                                    </p>
+                                                        
+                                                        <?php if ($canzone['genere']): ?>
+                                                            <div class="song-genre"><?php echo htmlspecialchars($canzone['genere']); ?></div>
+                                                        <?php endif; ?>
+                                                        
+                                                        
+                                                    </div>
                                                     
                                                     <!-- Azioni -->
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <button class="btn btn-sm"
-                                                                onclick="riproduciCanzone(
-                                                                    '<?php echo htmlspecialchars($canzone['file_path']); ?>',
-                                                                    '<?php echo addslashes($canzone['titolo']); ?>',
-                                                                    '<?php echo addslashes($canzone['artista']); ?>',
-                                                                    <?php echo $canzone['id']; ?>)"
-                                                                style="background: linear-gradient(135deg, #8b00ff, #7000d4);
-                                                                       color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                    <div class="song-actions">
+                                                        <button class="btn btn-sm btn-play-search"
+                                                                data-song-id="<?php echo $canzone['id']; ?>"
+                                                                data-song-index="<?php echo $index; ?>"
+                                                                style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
                                                             <i class="fas fa-play mr-1"></i>Riproduci
                                                         </button>
                                                         
@@ -440,74 +577,53 @@ if (!empty($query)) {
                                     </h4>
                                     <div class="row">
                                         <?php foreach ($risultati_artista as $index => $canzone): ?>
-                                            <div class="col-lg-4 col-md-6 mb-4">
-                                                <div class="underglow-box p-3 song-card" 
+                                            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                                                <div class="underglow-box song-card-squared song-card"
                                                      data-song-id="<?php echo $canzone['id']; ?>"
                                                      data-song-index="<?php echo $index + count($risultati_titolo); ?>"
                                                      data-song-title="<?php echo htmlspecialchars($canzone['titolo']); ?>"
                                                      data-song-artist="<?php echo htmlspecialchars($canzone['artista']); ?>"
-                                                     data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>"
-                                                     style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
-                                                    <!-- Copertina album -->
-                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; overflow: hidden; position: relative;">
+                                                     data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>">
+                                                    
+                                                    <!-- Contenitore copertina quadrato -->
+                                                    <div class="song-cover-container">
                                                         <!-- Copertina dal MP3 -->
-                                                        <img src="extract_cover.php?song_id=<?php echo $canzone['id']; ?>"
-                                                             style="width: 100%; height: 100%; object-fit: cover;"
-                                                             onerror="this.onerror=null; this.style.display='none';
-                                                                      this.nextElementSibling.style.display='flex';"
+                                                        <img src="extract_cover.php?song_id=<?php echo $canzone['id']; ?>&t=<?php echo time(); ?>"
+                                                             class="song-cover-image"
+                                                             onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
                                                              alt="Copertina di <?php echo htmlspecialchars($canzone['titolo']); ?>">
-
+                                                        
                                                         <!-- Fallback: iniziale -->
-                                                        <div style="display: flex; align-items: center; justify-content: center;
-                                                                    width: 100%; height: 100%;
-                                                                    background: linear-gradient(135deg, #333, #444);
-                                                                    font-size: 48px; color: #ccc;">
+                                                        <div class="song-cover-fallback">
                                                             <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
                                                         </div>
+                                                        
                                                         <!-- Indicatore "now playing" -->
-                                                        <div class="now-playing-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(139, 0, 255, 0.3); display: none; align-items: center; justify-content: center; font-size: 40px; color: white;">
+                                                        <div class="now-playing-overlay">
                                                             <i class="fas fa-play-circle"></i>
                                                         </div>
                                                     </div>
                                                     
                                                     <!-- Info canzone -->
-                                                    <h5 style="color: #fff; margin-bottom: 5px;"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
-                                                    <p class="text-muted mb-2">
-                                                        <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
-                                                    </p>
-                                                    
-                                                    <?php if ($canzone['genere']): ?>
-                                                        <div class="mb-3">
-                                                            <span class="badge" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border-radius: 20px; padding: 4px 12px;">
-                                                                <?php echo htmlspecialchars($canzone['genere']); ?>
-                                                            </span>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                    
-                                                    <!-- Anno -->
-                                                    <?php if ($canzone['anno']): ?>
-                                                        <p class="text-muted mb-2">
-                                                            <i class="fas fa-calendar-alt mr-1"></i>Anno: <?php echo htmlspecialchars($canzone['anno']); ?>
+                                                    <div class="song-info">
+                                                        <h5 class="song-title"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
+                                                        <p class="song-artist">
+                                                            <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
                                                         </p>
-                                                    <?php endif; ?>
-                                                    
-                                                    <!-- Caricato da -->
-                                                    <p class="text-muted mb-3">
-                                                        <small>
-                                                            <i class="fas fa-upload mr-1"></i>Caricata da: <?php echo htmlspecialchars($canzone['caricato_da']); ?>
-                                                        </small>
-                                                    </p>
+                                                        
+                                                        <?php if ($canzone['genere']): ?>
+                                                            <div class="song-genre"><?php echo htmlspecialchars($canzone['genere']); ?></div>
+                                                        <?php endif; ?>
+                                                        
+                                                        
+                                                    </div>
                                                     
                                                     <!-- Azioni -->
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <button class="btn btn-sm"
-                                                                onclick="riproduciCanzone(
-                                                                    '<?php echo htmlspecialchars($canzone['file_path']); ?>',
-                                                                    '<?php echo addslashes($canzone['titolo']); ?>',
-                                                                    '<?php echo addslashes($canzone['artista']); ?>',
-                                                                    <?php echo $canzone['id']; ?>)"
-                                                                style="background: linear-gradient(135deg, #8b00ff, #7000d4);
-                                                                       color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                    <div class="song-actions">
+                                                        <button class="btn btn-sm btn-play-search"
+                                                                data-song-id="<?php echo $canzone['id']; ?>"
+                                                                data-song-index="<?php echo $index + count($risultati_titolo); ?>"
+                                                                style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
                                                             <i class="fas fa-play mr-1"></i>Riproduci
                                                         </button>
                                                         
@@ -541,74 +657,53 @@ if (!empty($query)) {
                                     </h4>
                                     <div class="row">
                                         <?php foreach ($risultati_genere as $index => $canzone): ?>
-                                            <div class="col-lg-4 col-md-6 mb-4">
-                                                <div class="underglow-box p-3 song-card" 
+                                            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                                                <div class="underglow-box song-card-squared song-card"
                                                      data-song-id="<?php echo $canzone['id']; ?>"
                                                      data-song-index="<?php echo $index + count($risultati_titolo) + count($risultati_artista); ?>"
                                                      data-song-title="<?php echo htmlspecialchars($canzone['titolo']); ?>"
                                                      data-song-artist="<?php echo htmlspecialchars($canzone['artista']); ?>"
-                                                     data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>"
-                                                     style="border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; transition: all 0.3s ease; height: 100%;">
-                                                    <!-- Copertina album -->
-                                                    <div class="mb-3" style="height: 150px; border-radius: 8px; overflow: hidden; position: relative;">
+                                                     data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>">
+                                                    
+                                                    <!-- Contenitore copertina quadrato -->
+                                                    <div class="song-cover-container">
                                                         <!-- Copertina dal MP3 -->
-                                                        <img src="extract_cover.php?song_id=<?php echo $canzone['id']; ?>"
-                                                             style="width: 100%; height: 100%; object-fit: cover;"
-                                                             onerror="this.onerror=null; this.style.display='none';
-                                                                      this.nextElementSibling.style.display='flex';"
+                                                        <img src="extract_cover.php?song_id=<?php echo $canzone['id']; ?>&t=<?php echo time(); ?>"
+                                                             class="song-cover-image"
+                                                             onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
                                                              alt="Copertina di <?php echo htmlspecialchars($canzone['titolo']); ?>">
-
+                                                        
                                                         <!-- Fallback: iniziale -->
-                                                        <div style="display: flex; align-items: center; justify-content: center;
-                                                                    width: 100%; height: 100%;
-                                                                    background: linear-gradient(135deg, #333, #444);
-                                                                    font-size: 48px; color: #ccc;">
+                                                        <div class="song-cover-fallback">
                                                             <?php echo strtoupper(substr($canzone['titolo'], 0, 1)); ?>
                                                         </div>
+                                                        
                                                         <!-- Indicatore "now playing" -->
-                                                        <div class="now-playing-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(139, 0, 255, 0.3); display: none; align-items: center; justify-content: center; font-size: 40px; color: white;">
+                                                        <div class="now-playing-overlay">
                                                             <i class="fas fa-play-circle"></i>
                                                         </div>
                                                     </div>
                                                     
                                                     <!-- Info canzone -->
-                                                    <h5 style="color: #fff; margin-bottom: 5px;"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
-                                                    <p class="text-muted mb-2">
-                                                        <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
-                                                    </p>
-                                                    
-                                                    <?php if ($canzone['genere']): ?>
-                                                        <div class="mb-3">
-                                                            <span class="badge" style="background: rgba(139, 0, 255, 0.2); color: #d7a3ff; border-radius: 20px; padding: 4px 12px;">
-                                                                <?php echo htmlspecialchars($canzone['genere']); ?>
-                                                            </span>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                    
-                                                    <!-- Anno -->
-                                                    <?php if ($canzone['anno']): ?>
-                                                        <p class="text-muted mb-2">
-                                                            <i class="fas fa-calendar-alt mr-1"></i>Anno: <?php echo htmlspecialchars($canzone['anno']); ?>
+                                                    <div class="song-info">
+                                                        <h5 class="song-title"><?php echo htmlspecialchars($canzone['titolo']); ?></h5>
+                                                        <p class="song-artist">
+                                                            <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($canzone['artista']); ?>
                                                         </p>
-                                                    <?php endif; ?>
-                                                    
-                                                    <!-- Caricato da -->
-                                                    <p class="text-muted mb-3">
-                                                        <small>
-                                                            <i class="fas fa-upload mr-1"></i>Caricata da: <?php echo htmlspecialchars($canzone['caricato_da']); ?>
-                                                        </small>
-                                                    </p>
+                                                        
+                                                        <?php if ($canzone['genere']): ?>
+                                                            <div class="song-genre"><?php echo htmlspecialchars($canzone['genere']); ?></div>
+                                                        <?php endif; ?>
+                                                        
+                                                        
+                                                    </div>
                                                     
                                                     <!-- Azioni -->
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <button class="btn btn-sm"
-                                                                onclick="riproduciCanzone(
-                                                                    '<?php echo htmlspecialchars($canzone['file_path']); ?>',
-                                                                    '<?php echo addslashes($canzone['titolo']); ?>',
-                                                                    '<?php echo addslashes($canzone['artista']); ?>',
-                                                                    <?php echo $canzone['id']; ?>)"
-                                                                style="background: linear-gradient(135deg, #8b00ff, #7000d4);
-                                                                       color: white; border: none; border-radius: 6px; padding: 6px 12px;">
+                                                    <div class="song-actions">
+                                                        <button class="btn btn-sm btn-play-search"
+                                                                data-song-id="<?php echo $canzone['id']; ?>"
+                                                                data-song-index="<?php echo $index + count($risultati_titolo) + count($risultati_artista); ?>"
+                                                                style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
                                                             <i class="fas fa-play mr-1"></i>Riproduci
                                                         </button>
                                                         
@@ -769,10 +864,6 @@ if (!empty($query)) {
                 audioPlayer.src = canzone.file_path;
                 audioPlayer.volume = volume;
                 audioPlayer.play();
-                
-                // Aggiorna controlli
-                $('#search-player-play').html('<i class="fas fa-pause"></i>');
-                isPlaying = true;
                 
                 // Aggiorna controlli
                 $('#search-player-play').html('<i class="fas fa-pause"></i>');
@@ -1027,7 +1118,7 @@ if (!empty($query)) {
         // Applica evidenziazione alle card
         <?php if (!empty($query)): ?>
             const searchQuery = "<?php echo addslashes($query); ?>";
-            $('.song-card h5').each(function() {
+            $('.song-card .song-title').each(function() {
                 const originalText = $(this).text();
                 const highlighted = evidenziaTesto(originalText, searchQuery);
                 if (highlighted !== originalText) {
