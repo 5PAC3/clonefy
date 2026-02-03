@@ -340,7 +340,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Container principale SPAZIATO DALLA NAVBAR -->
     <div class="main-container" style="position: absolute; top: 70px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 70px); padding: 20px;">
         <div class="main-row">
