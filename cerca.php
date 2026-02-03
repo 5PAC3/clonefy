@@ -427,60 +427,6 @@
         </div>
     </nav>
 
-    <!-- PLAYER FISSO IN BASSO (visibile solo quando si riproduce una canzone) -->
-    <div id="search-player-container" class="hidden">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <div id="search-player-cover" class="mr-3" style="width: 50px; height: 50px; border-radius: 8px; background: linear-gradient(135deg, #8b00ff, #7000d4); display: flex; align-items: center; justify-content: center; font-size: 20px; color: white;">
-                            <i class="fas fa-music"></i>
-                        </div>
-                        <div>
-                            <div id="search-player-title" class="text-white" style="font-weight: 600; font-size: 0.95rem;">Nessuna canzone in riproduzione</div>
-                            <div id="search-player-artist" class="text-muted" style="font-size: 0.85rem;">Seleziona una canzone dai risultati</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-center align-items-center">
-                        <button id="search-player-prev" class="btn btn-link text-white mr-3" style="font-size: 20px;">
-                            <i class="fas fa-step-backward"></i>
-                        </button>
-                        <button id="search-player-play" class="btn mr-3" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-play"></i>
-                        </button>
-                        <button id="search-player-next" class="btn btn-link text-white ml-3" style="font-size: 20px;">
-                            <i class="fas fa-step-forward"></i>
-                        </button>
-                    </div>
-                    <div class="mt-2">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small id="search-player-current" class="text-muted">0:00</small>
-                            <div class="progress flex-grow-1 mx-2" style="height: 4px; background: rgba(255, 255, 255, 0.1);">
-                                <div id="search-player-progress" class="progress-bar" style="background: #8b00ff; width: 0%;"></div>
-                            </div>
-                            <small id="search-player-duration" class="text-muted">0:00</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 text-right">
-                    <div class="d-flex align-items-center justify-content-end">
-                        <button id="search-player-volume-toggle" class="btn btn-link text-white mr-2">
-                            <i class="fas fa-volume-up"></i>
-                        </button>
-                        <div class="volume-slider-container" style="width: 100px;">
-                            <input type="range" id="search-player-volume" min="0" max="100" value="80" class="w-100" style="height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px;">
-                        </div>
-                        <button id="search-player-close" class="btn btn-link text-danger ml-3">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Container principale -->
     <div class="main-container" style="position: absolute; top: 70px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 70px); padding: 20px;">
         <div class="main-row">
@@ -860,135 +806,132 @@
         </div>
     </div>
 
-        <script>
-    // Funzione per comunicare con il player globale
-    // Funzione per comunicare con il player globale
-// In tutte le pagine, verifica che il path sia corretto:
-// Funzione per comunicare con il player globale - VERSIONE CORRETTA
-function sendToGlobalPlayer(message) {
-    const iframe = document.getElementById('global-player-frame');
-    
-    if (iframe && iframe.contentWindow) {
-        console.log("Invio messaggio al player:", message);
-        iframe.contentWindow.postMessage(message, '*');
-    } else {
-        console.error("Iframe del player non trovato");
-        // Salva nel localStorage come fallback
-        if (message.type === 'GLOBAL_PLAYER_PLAY_SONG') {
-            localStorage.setItem('pending_player_command', JSON.stringify(message));
+    <script>
+        // Funzione per comunicare con il player globale
+        function sendToGlobalPlayer(message) {
+            const iframe = document.getElementById('global-player-frame');
+            
+            if (iframe && iframe.contentWindow) {
+                console.log("Invio messaggio al player:", message);
+                iframe.contentWindow.postMessage(message, '*');
+            } else {
+                console.error("Iframe del player non trovato");
+                // Salva nel localStorage come fallback
+                if (message.type === 'GLOBAL_PLAYER_PLAY_SONG') {
+                    localStorage.setItem('pending_player_command', JSON.stringify(message));
+                }
+            }
         }
-    }
-}
 
-// All'inizio della pagina, aggiungi questo:
-document.addEventListener('DOMContentLoaded', function() {
-    // Controlla se ci sono comandi pendenti
-    const pendingCommand = localStorage.getItem('pending_player_command');
-    if (pendingCommand) {
-        try {
-            const command = JSON.parse(pendingCommand);
-            sendToGlobalPlayer(command);
-            localStorage.removeItem('pending_player_command');
-        } catch (e) {
-            console.error("Errore nel parsing del comando pendente:", e);
-        }
-    }
-    
-    // Ascolta messaggi dal player
-    window.addEventListener('message', function(event) {
-        if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
-            console.log("Aggiornamento stato player:", event.data);
-            // Puoi aggiornare UI qui se necessario
-        }
-    });
-});
-    
-    $(document).ready(function() {
-        // Focus sulla barra di ricerca
-        $('input[name="q"]').focus();
-        $('input[name="q"]').select();
-        
-        // Click su "Riproduci" nelle card
-        $(document).on('click', '.btn-play-search', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const songId = $(this).data('song-id');
-            const songIndex = $(this).data('song-index');
-            
-            // Trova la canzone nell'array
-            const song = canzoniDisponibili.find(s => s.id === songId);
-            
-            if (song) {
-                // Invia la canzone al player globale
-                sendToGlobalPlayer({
-                    type: 'GLOBAL_PLAYER_PLAY_SONG',
-                    song: song
-                });
-                
-                // Imposta l'intera playlist
-                sendToGlobalPlayer({
-                    type: 'GLOBAL_PLAYER_SET_PLAYLIST',
-                    playlist: canzoniDisponibili,
-                    currentIndex: songIndex
-                });
-                
-                // Aggiorna UI locale
-                $('.song-card').removeClass('current-song-highlight');
-                $('.now-playing-overlay').hide();
-                $('.btn-play-search').show();
-                $('.btn-pause-search').hide();
-                $('.btn-play-search').removeClass('playing');
-                
-                $(`.song-card[data-song-id="${song.id}"]`).addClass('current-song-highlight');
-                $(`.song-card[data-song-id="${song.id}"] .now-playing-overlay`).show();
-                $(`.song-card[data-song-id="${song.id}"] .btn-play-search`).hide();
-                $(`.song-card[data-song-id="${song.id}"] .btn-pause-search`).show();
-                $(`.song-card[data-song-id="${song.id}"] .btn-play-search`).addClass('playing');
+        // All'inizio della pagina, aggiungi questo:
+        document.addEventListener('DOMContentLoaded', function() {
+            // Controlla se ci sono comandi pendenti
+            const pendingCommand = localStorage.getItem('pending_player_command');
+            if (pendingCommand) {
+                try {
+                    const command = JSON.parse(pendingCommand);
+                    sendToGlobalPlayer(command);
+                    localStorage.removeItem('pending_player_command');
+                } catch (e) {
+                    console.error("Errore nel parsing del comando pendente:", e);
+                }
             }
-        });
-        
-        // Click su "Pausa" nelle card
-        $(document).on('click', '.btn-pause-search', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
             
-            // Invia comando pausa al player globale
-            sendToGlobalPlayer({type: 'GLOBAL_PLAYER_TOGGLE'});
-            
-            // Aggiorna UI locale
-            $(this).hide();
-            $(this).siblings('.btn-play-search').show();
-        });
-        
-        // Tasti da tastiera
-        $(document).keydown(function(e) {
-            // Spazio per play/pause globale
-            if (e.keyCode === 32 && !$(e.target).is('input, textarea')) {
-                e.preventDefault();
-                sendToGlobalPlayer({type: 'GLOBAL_PLAYER_TOGGLE'});
-            }
-        });
-        
-        // Funzione per evidenziare testo cercato
-        function evidenziaTesto(testo, query) {
-            if (!query) return testo;
-            const regex = new RegExp(`(${query})`, 'gi');
-            return testo.replace(regex, '<mark style="background: rgba(139, 0, 255, 0.3); color: #fff; padding: 1px 4px; border-radius: 3px;">$1</mark>');
-        }
-        
-        // Applica evidenziazione alle card
-        <?php if (!empty($query)): ?>
-            const searchQuery = "<?php echo addslashes($query); ?>";
-            $('.song-card .song-title').each(function() {
-                const originalText = $(this).text();
-                const highlighted = evidenziaTesto(originalText, searchQuery);
-                if (highlighted !== originalText) {
-                    $(this).html(highlighted);
+            // Ascolta messaggi dal player
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
+                    console.log("Aggiornamento stato player:", event.data);
+                    // Puoi aggiornare UI qui se necessario
                 }
             });
-        <?php endif; ?>
-    });
+        });
+        
+        $(document).ready(function() {
+            // Focus sulla barra di ricerca
+            $('input[name="q"]').focus();
+            $('input[name="q"]').select();
+            
+            // Click su "Riproduci" nelle card
+            $(document).on('click', '.btn-play-search', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const songId = $(this).data('song-id');
+                const songIndex = $(this).data('song-index');
+                
+                // Trova la canzone nell'array
+                const song = canzoniDisponibili.find(s => s.id === songId);
+                
+                if (song) {
+                    // Invia la canzone al player globale
+                    sendToGlobalPlayer({
+                        type: 'GLOBAL_PLAYER_PLAY_SONG',
+                        song: song
+                    });
+                    
+                    // Imposta l'intera playlist
+                    sendToGlobalPlayer({
+                        type: 'GLOBAL_PLAYER_SET_PLAYLIST',
+                        playlist: canzoniDisponibili,
+                        currentIndex: songIndex
+                    });
+                    
+                    // Aggiorna UI locale
+                    $('.song-card').removeClass('current-song-highlight');
+                    $('.now-playing-overlay').hide();
+                    $('.btn-play-search').show();
+                    $('.btn-pause-search').hide();
+                    $('.btn-play-search').removeClass('playing');
+                    
+                    $(`.song-card[data-song-id="${song.id}"]`).addClass('current-song-highlight');
+                    $(`.song-card[data-song-id="${song.id}"] .now-playing-overlay`).show();
+                    $(`.song-card[data-song-id="${song.id}"] .btn-play-search`).hide();
+                    $(`.song-card[data-song-id="${song.id}"] .btn-pause-search`).show();
+                    $(`.song-card[data-song-id="${song.id}"] .btn-play-search`).addClass('playing');
+                }
+            });
+            
+            // Click su "Pausa" nelle card
+            $(document).on('click', '.btn-pause-search', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Invia comando pausa al player globale
+                sendToGlobalPlayer({type: 'GLOBAL_PLAYER_TOGGLE'});
+                
+                // Aggiorna UI locale
+                $(this).hide();
+                $(this).siblings('.btn-play-search').show();
+            });
+            
+            // Tasti da tastiera
+            $(document).keydown(function(e) {
+                // Spazio per play/pause globale
+                if (e.keyCode === 32 && !$(e.target).is('input, textarea')) {
+                    e.preventDefault();
+                    sendToGlobalPlayer({type: 'GLOBAL_PLAYER_TOGGLE'});
+                }
+            });
+            
+            // Funzione per evidenziare testo cercato
+            function evidenziaTesto(testo, query) {
+                if (!query) return testo;
+                const regex = new RegExp(`(${query})`, 'gi');
+                return testo.replace(regex, '<mark style="background: rgba(139, 0, 255, 0.3); color: #fff; padding: 1px 4px; border-radius: 3px;">$1</mark>');
+            }
+            
+            // Applica evidenziazione alle card
+            <?php if (!empty($query)): ?>
+                const searchQuery = "<?php echo addslashes($query); ?>";
+                $('.song-card .song-title').each(function() {
+                    const originalText = $(this).text();
+                    const highlighted = evidenziaTesto(originalText, searchQuery);
+                    if (highlighted !== originalText) {
+                        $(this).html(highlighted);
+                    }
+                });
+            <?php endif; ?>
+        });
     </script>
 </body>
 </html>
