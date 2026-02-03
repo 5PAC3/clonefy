@@ -102,53 +102,9 @@ if (!empty($query)) {
     <!-- Bootstrap JS e jQuery per funzionalità audio -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>
     <style>
-        /* Stili per il player della pagina di ricerca */
-        #search-player-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 9999;
-            background: rgba(18, 18, 18, 0.98);
-            border-top: 2px solid #8b00ff;
-            padding: 15px;
-            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-        }
         
-        #search-player-container.hidden {
-            transform: translateY(100%);
-            opacity: 0;
-        }
-        
-        .now-playing-indicator {
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-        
-        .btn-play-search {
-            transition: all 0.2s ease;
-        }
-        
-        .btn-play-search:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(139, 0, 255, 0.4);
-        }
-        
-        .btn-play-search.playing {
-            background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
-        }
-        
-        .current-song-highlight {
-            border: 2px solid #8b00ff !important;
-            background: rgba(139, 0, 255, 0.05) !important;
-        }
         
         /* Stili per card quadrate compatte */
         .song-card-squared {
@@ -806,159 +762,78 @@ if (!empty($query)) {
         </div>
     </div>
 
-    <script>
-    // ==============================
-    // SISTEMA DI RIPRODUZIONE AUDIO
-    // ==============================
+        <script>
+    // Funzione per comunicare con il player globale
+    // Funzione per comunicare con il player globale
+// In tutte le pagine, verifica che il path sia corretto:
+function sendToGlobalPlayer(message) {
+    const iframe = document.getElementById('global-player-frame');
+    
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(message, '*');
+    }
+    
+    // DEBUG: mostra in console cosa stiamo inviando
+    console.log("Inviato al player:", message);
+}
+
+// Al caricamento di ogni pagina, controlla se c'è una canzone in riproduzione
+document.addEventListener('DOMContentLoaded', function() {
+    // Controlla se c'è una canzone pendente da caricare
+    const pendingSong = localStorage.getItem('pending_song');
+    if (pendingSong) {
+        try {
+            const data = JSON.parse(pendingSong);
+            if (data.song) {
+                // Attendi che l'iframe sia pronto
+                const checkIframe = setInterval(() => {
+                    const iframe = document.getElementById('global-player-frame');
+                    if (iframe && iframe.contentWindow) {
+                        clearInterval(checkIframe);
+                        sendToGlobalPlayer({
+                            type: 'GLOBAL_PLAYER_PLAY_SONG',
+                            song: data.song,
+                            playlist: data.playlist,
+                            currentIndex: data.index
+                        });
+                    }
+                }, 100);
+                
+                // Timeout dopo 3 secondi
+                setTimeout(() => clearInterval(checkIframe), 3000);
+            }
+        } catch (error) {
+            console.error("Errore nel parsing della canzone pendente:", error);
+        }
+    }
+    
+    // Ascolta messaggi dal player
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
+            // Il player ci informa dello stato corrente
+            console.log("Stato player aggiornato:", event.data);
+            
+            // Puoi aggiornare l'UI se necessario (evidenziare canzone corrente, etc.)
+            if (event.data.song) {
+                // Rimuovi evidenziazione da tutte le canzoni
+                document.querySelectorAll('.song-playing, .current-song-highlight').forEach(el => {
+                    el.classList.remove('song-playing', 'current-song-highlight');
+                });
+                
+                // Evidenzia canzone corrente
+                const currentSongElement = document.querySelector(`[data-song-id="${event.data.song.id}"]`);
+                if (currentSongElement) {
+                    currentSongElement.classList.add('song-playing', 'current-song-highlight');
+                }
+            }
+        }
+    });
+});
     
     $(document).ready(function() {
         // Focus sulla barra di ricerca
         $('input[name="q"]').focus();
         $('input[name="q"]').select();
-        
-        // ===================
-        // FUNZIONI DEL PLAYER
-        // ===================
-        
-        // Mostra/nascondi player
-        function mostraPlayer() {
-            $('#search-player-container').removeClass('hidden');
-            $('body').css('padding-bottom', '120px');
-        }
-        
-        function nascondiPlayer() {
-            $('#search-player-container').addClass('hidden');
-            $('body').css('padding-bottom', '0');
-        }
-        
-        // Riproduci una canzone specifica
-        function riproduciCanzone(indice) {
-            if (indice >= 0 && indice < canzoniDisponibili.length) {
-                const canzone = canzoniDisponibili[indice];
-                canzoneCorrente = canzone;
-                indiceCorrente = indice;
-                
-                // Aggiorna UI
-                $('#search-player-title').text(canzone.titolo);
-                $('#search-player-artist').text(canzone.artista);
-                
-                // CARICA COPERTINA - Mostra loader prima
-                $('#search-player-cover').html('<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;"><i class="fas fa-spinner fa-spin"></i></div>');
-                
-                // Imposta la copertina con URL e timestamp per evitare cache
-                const coverUrl = canzone.copertina_url + '&t=' + new Date().getTime();
-                const img = new Image();
-                
-                img.onload = function() {
-                    $('#search-player-cover').html('<img src="' + coverUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">');
-                };
-                
-                img.onerror = function() {
-                    // Fallback se non c'è copertina
-                    $('#search-player-cover').html('<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:linear-gradient(135deg,#8b00ff,#7000d4);color:white;border-radius:8px;font-size:20px;"><i class="fas fa-music"></i></div>');
-                };
-                
-                img.src = coverUrl;
-                
-                // Imposta e riproduci audio
-                audioPlayer.src = canzone.file_path;
-                audioPlayer.volume = volume;
-                audioPlayer.play();
-                
-                // Aggiorna controlli
-                $('#search-player-play').html('<i class="fas fa-pause"></i>');
-                isPlaying = true;
-                
-                // Mostra player
-                mostraPlayer();
-                
-                // Evidenzia la card della canzone corrente
-                $('.song-card').removeClass('current-song-highlight');
-                $('.now-playing-overlay').hide();
-                $('.btn-play-search').show();
-                $('.btn-pause-search').hide();
-                $('.btn-play-search').removeClass('playing');
-                
-                $(`.song-card[data-song-id="${canzone.id}"]`).addClass('current-song-highlight');
-                $(`.song-card[data-song-id="${canzone.id}"] .now-playing-overlay`).show();
-                $(`.song-card[data-song-id="${canzone.id}"] .btn-play-search`).hide();
-                $(`.song-card[data-song-id="${canzone.id}"] .btn-pause-search`).show();
-                $(`.song-card[data-song-id="${canzone.id}"] .btn-play-search`).addClass('playing');
-                
-                // Scroll alla canzone se non è visibile
-                const card = $(`.song-card[data-song-id="${canzone.id}"]`);
-                if (card.length) {
-                    const cardOffset = card.offset().top;
-                    const scrollableContent = $('.scrollable-content');
-                    const scrollTop = scrollableContent.scrollTop();
-                    const contentHeight = scrollableContent.height();
-                    
-                    if (cardOffset < scrollTop || cardOffset > scrollTop + contentHeight - 200) {
-                        scrollableContent.animate({
-                            scrollTop: cardOffset - 100
-                        }, 500);
-                    }
-                }
-            }
-        }
-
-        function aggiornaCopertinaPlayer() {
-            if (canzoneCorrente && canzoneCorrente.copertina_url) {
-                const coverUrl = canzoneCorrente.copertina_url + '&t=' + new Date().getTime();
-                const img = new Image();
-                
-                img.onload = function() {
-                    $('#search-player-cover').html('<img src="' + coverUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">');
-                };
-                
-                img.onerror = function() {
-                    $('#search-player-cover').html('<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:linear-gradient(135deg,#8b00ff,#7000d4);color:white;border-radius:8px;font-size:20px;"><i class="fas fa-music"></i></div>');
-                };
-                
-                img.src = coverUrl;
-            }
-        }
-        // Pausa/riproduci
-        function togglePlayPause() {
-            if (canzoneCorrente) {
-                if (isPlaying) {
-                    audioPlayer.pause();
-                    $('#search-player-play').html('<i class="fas fa-play"></i>');
-                } else {
-                    audioPlayer.play();
-                    $('#search-player-play').html('<i class="fas fa-pause"></i>');
-                }
-                isPlaying = !isPlaying;
-            }
-        }
-        
-        // Canzone successiva
-        function prossimaCanzone() {
-            if (indiceCorrente < canzoniDisponibili.length - 1) {
-                riproduciCanzone(indiceCorrente + 1);
-            } else {
-                riproduciCanzone(0); // Torna alla prima
-            }
-        }
-
-        function canzonePrecedente() {
-            if (indiceCorrente > 0) {
-                riproduciCanzone(indiceCorrente - 1);
-            } else {
-                riproduciCanzone(canzoniDisponibili.length - 1); // Vai all'ultima
-            }
-        }
-        
-        // Formatta secondi in MM:SS
-        function formattaTempo(secondi) {
-            const min = Math.floor(secondi / 60);
-            const sec = Math.floor(secondi % 60);
-            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
-        }
-        
-        // ===================
-        // EVENT LISTENERS
-        // ===================
         
         // Click su "Riproduci" nelle card
         $(document).on('click', '.btn-play-search', function(e) {
@@ -968,16 +843,35 @@ if (!empty($query)) {
             const songId = $(this).data('song-id');
             const songIndex = $(this).data('song-index');
             
-            if (songId === canzoneCorrente?.id && isPlaying) {
-                // Se è la stessa canzone già in riproduzione, metti in pausa
-                audioPlayer.pause();
-                isPlaying = false;
-                $(this).hide();
-                $(this).siblings('.btn-pause-search').show();
-                $('#search-player-play').html('<i class="fas fa-play"></i>');
-            } else {
-                // Riproduci la canzone selezionata
-                riproduciCanzone(songIndex);
+            // Trova la canzone nell'array
+            const song = canzoniDisponibili.find(s => s.id === songId);
+            
+            if (song) {
+                // Invia la canzone al player globale
+                sendToGlobalPlayer({
+                    type: 'GLOBAL_PLAYER_PLAY_SONG',
+                    song: song
+                });
+                
+                // Imposta l'intera playlist
+                sendToGlobalPlayer({
+                    type: 'GLOBAL_PLAYER_SET_PLAYLIST',
+                    playlist: canzoniDisponibili,
+                    currentIndex: songIndex
+                });
+                
+                // Aggiorna UI locale
+                $('.song-card').removeClass('current-song-highlight');
+                $('.now-playing-overlay').hide();
+                $('.btn-play-search').show();
+                $('.btn-pause-search').hide();
+                $('.btn-play-search').removeClass('playing');
+                
+                $(`.song-card[data-song-id="${song.id}"]`).addClass('current-song-highlight');
+                $(`.song-card[data-song-id="${song.id}"] .now-playing-overlay`).show();
+                $(`.song-card[data-song-id="${song.id}"] .btn-play-search`).hide();
+                $(`.song-card[data-song-id="${song.id}"] .btn-pause-search`).show();
+                $(`.song-card[data-song-id="${song.id}"] .btn-play-search`).addClass('playing');
             }
         });
         
@@ -986,127 +880,22 @@ if (!empty($query)) {
             e.preventDefault();
             e.stopPropagation();
             
-            audioPlayer.pause();
-            isPlaying = false;
+            // Invia comando pausa al player globale
+            sendToGlobalPlayer({type: 'GLOBAL_PLAYER_TOGGLE'});
+            
+            // Aggiorna UI locale
             $(this).hide();
             $(this).siblings('.btn-play-search').show();
-            $('#search-player-play').html('<i class="fas fa-play"></i>');
-        });
-        
-        // Controlli del player fisso
-        $('#search-player-play').click(function() {
-            togglePlayPause();
-        });
-        
-        $('#search-player-next').click(function() {
-            prossimaCanzone();
-        });
-        
-        $('#search-player-prev').click(function() {
-            canzonePrecedente();
-        });
-        
-        $('#search-player-close').click(function() {
-            if (audioPlayer) {
-                audioPlayer.pause();
-                audioPlayer.currentTime = 0;
-                isPlaying = false;
-            }
-            nascondiPlayer();
-            $('.song-card').removeClass('current-song-highlight');
-            $('.now-playing-overlay').hide();
-            $('.btn-play-search').show();
-            $('.btn-pause-search').hide();
-            $('.btn-play-search').removeClass('playing');
-        });
-        
-        // Volume
-        $('#search-player-volume').on('input', function() {
-            volume = $(this).val() / 100;
-            if (audioPlayer) {
-                audioPlayer.volume = volume;
-            }
-            
-            // Cambia icona volume
-            const icon = $('#search-player-volume-toggle i');
-            if (volume === 0) {
-                icon.removeClass('fa-volume-up fa-volume-down').addClass('fa-volume-mute');
-            } else if (volume < 0.5) {
-                icon.removeClass('fa-volume-up fa-volume-mute').addClass('fa-volume-down');
-            } else {
-                icon.removeClass('fa-volume-down fa-volume-mute').addClass('fa-volume-up');
-            }
-        });
-        
-        $('#search-player-volume-toggle').click(function() {
-            if (volume > 0) {
-                // Muto
-                $('#search-player-volume').val(0).trigger('input');
-            } else {
-                // Torna al 50%
-                $('#search-player-volume').val(50).trigger('input');
-            }
-        });
-        
-        // ===================
-        // EVENTI AUDIO
-        // ===================
-        
-        // Aggiorna progress bar
-        audioPlayer.addEventListener('timeupdate', function() {
-            if (audioPlayer.duration) {
-                const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-                $('#search-player-progress').css('width', percent + '%');
-                
-                $('#search-player-current').text(formattaTempo(audioPlayer.currentTime));
-                $('#search-player-duration').text(formattaTempo(audioPlayer.duration));
-            }
-        });
-        
-        // Canzone finita
-        audioPlayer.addEventListener('ended', function() {
-            // Riproduci automaticamente la prossima canzone
-            prossimaCanzone();
-        });
-        
-        // Click sulla progress bar per saltare
-        $('#search-player-progress').parent().click(function(e) {
-            const progressBar = $(this);
-            const clickPosition = e.pageX - progressBar.offset().left;
-            const progressBarWidth = progressBar.width();
-            const percent = (clickPosition / progressBarWidth);
-            
-            if (audioPlayer.duration) {
-                audioPlayer.currentTime = audioPlayer.duration * percent;
-            }
         });
         
         // Tasti da tastiera
         $(document).keydown(function(e) {
-            // Spazio per play/pause
+            // Spazio per play/pause globale
             if (e.keyCode === 32 && !$(e.target).is('input, textarea')) {
                 e.preventDefault();
-                togglePlayPause();
-            }
-            // Freccia sinistra per precedente
-            else if (e.keyCode === 37) {
-                if (e.ctrlKey) {
-                    e.preventDefault();
-                    audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 10);
-                }
-            }
-            // Freccia destra per successiva
-            else if (e.keyCode === 39) {
-                if (e.ctrlKey) {
-                    e.preventDefault();
-                    audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 10);
-                }
+                sendToGlobalPlayer({type: 'GLOBAL_PLAYER_TOGGLE'});
             }
         });
-        
-        // ===================
-        // UTILITY
-        // ===================
         
         // Funzione per evidenziare testo cercato
         function evidenziaTesto(testo, query) {

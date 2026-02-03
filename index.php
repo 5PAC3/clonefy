@@ -84,6 +84,7 @@ if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
     <!-- Bootstrap JS per dropdown -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>
     <style>
         .cover-loading {
             position: relative;
@@ -124,6 +125,11 @@ if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
         
         .play-btn.playing {
             background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
+        }
+        
+        /* Aggiungi padding in basso per il player fisso */
+        body {
+            padding-bottom: 100px !important;
         }
     </style>
 </head>
@@ -414,60 +420,55 @@ if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
             <div class="main-col">
                 <div class="underglow-box full-height">
                     <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
-                        <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-play-circle mr-2"></i>Riproduzione</h3>
+                        <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-info-circle mr-2"></i>Informazioni</h3>
                     </div>
-                    <div class="scrollable-content text-center">
-                        <!-- Copertina DINAMICA dal MP3 -->
-                        <div id="album-cover" class="mx-auto mb-4 cover-loading" 
-                             style="width: 180px; height: 180px; border-radius: 12px; 
-                                    background: linear-gradient(135deg, #222, #333); 
-                                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); 
-                                    overflow: hidden;">
-                            
-                            <!-- Immagine copertina (dinamica dal MP3) -->
-                            <img id="cover-image" src="" 
-                                 style="width: 100%; height: 100%; object-fit: cover; display: none;"
-                                 onerror="this.style.display='none'; document.getElementById('cover-initial').style.display='flex';">
-                            
-                            <!-- Iniziale (fallback quando non c'è copertina) -->
-                            <div id="cover-initial" 
-                                 style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 72px; color: #ccc;">
-                                ♫
+                    <div class="scrollable-content">
+                        <div class="p-4 text-center">
+                            <div class="mb-4">
+                                <div style="width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 50%; background: linear-gradient(135deg, #8b00ff, #7000d4); display: flex; align-items: center; justify-content: center; font-size: 40px; color: white;">
+                                    <i class="fas fa-headphones"></i>
+                                </div>
+                                <h4 style="color: #fff; font-weight: 600;">Clonefy Player</h4>
+                                <p class="text-muted">Il player è ora nella barra in basso</p>
                             </div>
-                        </div>
-                        
-                        <!-- Info canzone -->
-                        <h4 id="titolo-canzone" style="color: #fff; font-weight: 600; margin-bottom: 5px;">Nessun brano</h4>
-                        <p id="artista-canzone" class="text-muted" style="margin-bottom: 20px;">Seleziona una canzone</p>
-                        
-                        <!-- Player Audio HTML5 semplice -->
-                        <audio id="player" controls class="w-100 mb-4" style="height: 45px; border-radius: 8px; background: rgba(25, 25, 25, 0.8);">
-                            Il tuo browser non supporta l'elemento audio.
-                        </audio>
-                        
-                        <!-- Controlli aggiuntivi -->
-                        <div class="d-flex justify-content-center mb-4">
-                            <button class="btn btn-sm mr-2" onclick="skipBackward()" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
-                                <i class="fas fa-backward mr-1"></i>10s
-                            </button>
-                            <button id="play-btn" class="btn btn-sm mr-2" onclick="togglePlay()" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 8px 20px;">
-                                <i class="fas fa-play mr-1"></i>Play
-                            </button>
-                            <button class="btn btn-sm" onclick="skipForward()" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
-                                <i class="fas fa-forward mr-1"></i>10s
-                            </button>
-                        </div>
-                        
-                        <hr style="border-color: rgba(139, 0, 255, 0.2); margin: 25px 0;">
-                        
-                        <!-- Link utili -->
-                        <div class="text-left">
-                            <a href="upload.php" class="d-block mb-3" style="color: #8b00ff; text-decoration: none;">
-                                <i class="fas fa-upload mr-2"></i>Carica canzone
-                            </a>
-                            <a href="logout.php" class="d-block" style="color: #ff4d4d; text-decoration: none;">
-                                <i class="fas fa-sign-out-alt mr-2"></i>Esci
-                            </a>
+                            
+                            <hr style="border-color: rgba(139, 0, 255, 0.2); margin: 25px 0;">
+                            
+                            <div class="text-left">
+                                <h5 style="color: #d7a3ff; margin-bottom: 15px;"><i class="fas fa-info-circle mr-2"></i>Come funziona</h5>
+                                <ul style="padding-left: 20px; color: #ccc;">
+                                    <li class="mb-2">Il player è sempre visibile in basso</li>
+                                    <li class="mb-2">Continua a riprodurre anche cambiando pagina</li>
+                                    <li class="mb-2">Usa i controlli per gestire la riproduzione</li>
+                                    <li>Premi Spazio per play/pause</li>
+                                </ul>
+                            </div>
+                            
+                            <hr style="border-color: rgba(139, 0, 255, 0.2); margin: 25px 0;">
+                            
+                            <div class="text-left">
+                                <h5 style="color: #d7a3ff; margin-bottom: 15px;"><i class="fas fa-music mr-2"></i>Funzionalità</h5>
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(139, 0, 255, 0.2); display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                            <i class="fas fa-play" style="color: #8b00ff; font-size: 12px;"></i>
+                                        </div>
+                                        <span style="color: #fff;">Riproduci canzoni</span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(139, 0, 255, 0.2); display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                            <i class="fas fa-pause" style="color: #8b00ff; font-size: 12px;"></i>
+                                        </div>
+                                        <span style="color: #fff;">Pausa e riprendi</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(139, 0, 255, 0.2); display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                            <i class="fas fa-step-forward" style="color: #8b00ff; font-size: 12px;"></i>
+                                        </div>
+                                        <span style="color: #fff;">Cerca nella traccia</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -475,175 +476,73 @@ if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
         </div>
     </div>
 
+    <!-- IFRAME per il player globale -->
+    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>
+
     <script>
-    // Variabili globali
-    let currentSongId = null;
-    let isPlaying = false;
+    // Funzione per comunicare con il player globale
+    // In tutte le pagine, verifica che il path sia corretto:
+function sendToGlobalPlayer(message) {
+    const iframe = document.getElementById('global-player-frame');
     
-    // Funzione per riprodurre una canzone CON COPERTINA DAL MP3
-    function riproduciCanzone(filePath, titolo, artista, songId) {
-        const player = document.getElementById('player');
-        
-        // Controlla se è la stessa canzone già in riproduzione
-        if (currentSongId === songId && isPlaying) {
-            player.pause();
-            isPlaying = false;
-            document.getElementById('play-btn').innerHTML = '<i class="fas fa-play mr-1"></i>Play';
-            document.getElementById('play-btn').classList.remove('playing');
-            return;
-        }
-        
-        // Se è una canzone diversa, caricala
-        currentSongId = songId;
-        
-        const source = document.createElement('source');
-        source.src = filePath;
-        source.type = 'audio/mpeg';
-        
-        // Rimuovi vecchie sorgenti
-        while(player.firstChild) {
-            player.removeChild(player.firstChild);
-        }
-        
-        player.appendChild(source);
-        player.load();
-        player.play();
-        
-        // Aggiorna UI
-        document.getElementById('titolo-canzone').textContent = titolo;
-        document.getElementById('artista-canzone').textContent = artista;
-        document.getElementById('play-btn').innerHTML = '<i class="fas fa-pause mr-1"></i>Pausa';
-        document.getElementById('play-btn').classList.add('playing');
-        isPlaying = true;
-        
-        // CARICA LA COPERTINA DAL MP3
-        loadAlbumCover(songId, titolo);
-        
-        // Aggiorna stato player quando la canzone finisce
-        player.onended = function() {
-            isPlaying = false;
-            document.getElementById('play-btn').innerHTML = '<i class="fas fa-play mr-1"></i>Play';
-            document.getElementById('play-btn').classList.remove('playing');
-        };
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(message, '*');
     }
     
-    // Funzione per caricare la copertina dal MP3 tramite PHP
-    function loadAlbumCover(songId, titolo) {
-        const albumCover = document.getElementById('album-cover');
-        const coverImage = document.getElementById('cover-image');
-        const coverInitial = document.getElementById('cover-initial');
-        
-        // Mostra loader
-        albumCover.classList.add('loading');
-        coverInitial.style.display = 'none';
-        coverImage.style.display = 'none';
-        
-        // Imposta la copertina con timestamp per evitare cache
-        const coverUrl = 'extract_cover.php?song_id=' + songId + '&t=' + new Date().getTime();
-        
-        // Precarica l'immagine
-        const img = new Image();
-        img.onload = function() {
-            // Quando l'immagine è caricata, mostrala
-            albumCover.classList.remove('loading');
-            coverImage.src = coverUrl;
-            coverImage.style.display = 'block';
-            coverInitial.style.display = 'none';
-        };
-        
-        img.onerror = function() {
-            // Se non c'è copertina, mostra iniziale
-            albumCover.classList.remove('loading');
-            albumCover.classList.add('error');
-            coverImage.style.display = 'none';
-            coverInitial.textContent = titolo.charAt(0).toUpperCase();
-            coverInitial.style.display = 'flex';
-            
-            // Rimuovi classe error dopo 2 secondi
-            setTimeout(() => {
-                albumCover.classList.remove('error');
-            }, 2000);
-        };
-        
-        img.src = coverUrl;
-    }
-    
-    // Funzioni di controllo player
-    function togglePlay() {
-        const player = document.getElementById('player');
-        const playBtn = document.getElementById('play-btn');
-        
-        if (player.paused) {
-            player.play();
-            playBtn.innerHTML = '<i class="fas fa-pause mr-1"></i>Pausa';
-            playBtn.classList.add('playing');
-            isPlaying = true;
-        } else {
-            player.pause();
-            playBtn.innerHTML = '<i class="fas fa-play mr-1"></i>Play';
-            playBtn.classList.remove('playing');
-            isPlaying = false;
-        }
-    }
-    
-    function skipBackward() {
-        const player = document.getElementById('player');
-        player.currentTime = Math.max(0, player.currentTime - 10);
-    }
-    
-    function skipForward() {
-        const player = document.getElementById('player');
-        player.currentTime = Math.min(player.duration, player.currentTime + 10);
-    }
-    
-    // Listener per tasti da tastiera
-    document.addEventListener('keydown', function(e) {
-        // Spazio per play/pause
-        if (e.code === 'Space' && !e.target.matches('input, textarea, button')) {
-            e.preventDefault();
-            togglePlay();
-        }
-        // Freccia sinistra per indietro
-        if (e.code === 'ArrowLeft' && e.ctrlKey) {
-            e.preventDefault();
-            skipBackward();
-        }
-        // Freccia destra per avanti
-        if (e.code === 'ArrowRight' && e.ctrlKey) {
-            e.preventDefault();
-            skipForward();
-        }
-    });
-    
-    // Mostra automaticamente il modal se c'è un errore
-    <?php if (isset($_GET['error']) && $_GET['error'] == 'nome_vuoto'): ?>
-        $(document).ready(function() {
-            $('#creaPlaylistModal').modal('show');
-        });
-    <?php endif; ?>
-    
-    // Focus sulla ricerca playlist se c'è una ricerca
-    <?php if (!empty($search_playlist)): ?>
-        $(document).ready(function() {
-            $('#searchPlaylistInput').focus();
-            $('#searchPlaylistInput').select();
-        });
-    <?php endif; ?>
-    
-    // Ricerca in tempo reale per playlist (JavaScript)
-    $(document).ready(function() {
-        $('#searchPlaylistInput').on('keyup', function() {
-            const searchTerm = $(this).val().toLowerCase();
-            $('.playlist-card').each(function() {
-                const title = $(this).find('h5').text().toLowerCase();
-                const description = $(this).find('p.text-muted').text().toLowerCase();
-                
-                if (title.includes(searchTerm) || description.includes(searchTerm)) {
-                    $(this).closest('.col-lg-6').show();
-                } else {
-                    $(this).closest('.col-lg-6').hide();
+    // DEBUG: mostra in console cosa stiamo inviando
+    console.log("Inviato al player:", message);
+}
+
+    // Al caricamento di ogni pagina, controlla se c'è una canzone in riproduzione
+    document.addEventListener('DOMContentLoaded', function() {
+        // Controlla se c'è una canzone pendente da caricare
+        const pendingSong = localStorage.getItem('pending_song');
+        if (pendingSong) {
+            try {
+                const data = JSON.parse(pendingSong);
+                if (data.song) {
+                    // Attendi che l'iframe sia pronto
+                    const checkIframe = setInterval(() => {
+                        const iframe = document.getElementById('global-player-frame');
+                        if (iframe && iframe.contentWindow) {
+                            clearInterval(checkIframe);
+                            sendToGlobalPlayer({
+                                type: 'GLOBAL_PLAYER_PLAY_SONG',
+                                song: data.song,
+                                playlist: data.playlist,
+                                currentIndex: data.index
+                            });
+                        }
+                    }, 100);
+                    
+                    // Timeout dopo 3 secondi
+                    setTimeout(() => clearInterval(checkIframe), 3000);
                 }
-            });
+            } catch (error) {
+                console.error("Errore nel parsing della canzone pendente:", error);
+            }
+        }
+        
+        // Ascolta messaggi dal player
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
+                // Il player ci informa dello stato corrente
+                console.log("Stato player aggiornato:", event.data);
+                
+                // Puoi aggiornare l'UI se necessario (evidenziare canzone corrente, etc.)
+                if (event.data.song) {
+                    // Rimuovi evidenziazione da tutte le canzoni
+                    document.querySelectorAll('.song-playing, .current-song-highlight').forEach(el => {
+                        el.classList.remove('song-playing', 'current-song-highlight');
+                    });
+                    
+                    // Evidenzia canzone corrente
+                    const currentSongElement = document.querySelector(`[data-song-id="${event.data.song.id}"]`);
+                    if (currentSongElement) {
+                        currentSongElement.classList.add('song-playing', 'current-song-highlight');
+                    }
+                }
+            }
         });
     });
     
@@ -710,8 +609,30 @@ if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
                 $('#creaPlaylistModal').modal('show');
             });
         <?php endif; ?>
+        
+        // Focus sulla ricerca playlist se c'è una ricerca
+        <?php if (!empty($search_playlist)): ?>
+            $(document).ready(function() {
+                $('#searchPlaylistInput').focus();
+                $('#searchPlaylistInput').select();
+            });
+        <?php endif; ?>
+        
+        // Ricerca in tempo reale per playlist (JavaScript)
+        $('#searchPlaylistInput').on('keyup', function() {
+            const searchTerm = $(this).val().toLowerCase();
+            $('.playlist-card').each(function() {
+                const title = $(this).find('h5').text().toLowerCase();
+                const description = $(this).find('p.text-muted').text().toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    $(this).closest('.col-lg-6').show();
+                } else {
+                    $(this).closest('.col-lg-6').hide();
+                }
+            });
+        });
     });
-    // FINE SCRIPT VALIDAZIONE
     </script>
 </body>
 </html>

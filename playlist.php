@@ -121,6 +121,7 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>
     <style>
         .song-playing-row {
             background: rgba(139, 0, 255, 0.1) !important;
@@ -131,35 +132,16 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
             background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
         }
         
-        #cover-image {
-            transition: opacity 0.3s ease;
+        /* Aggiungi padding in basso per il player fisso */
+        body {
+            padding-bottom: 100px !important;
         }
         
-        #album-cover {
-            transition: all 0.3s ease;
-        }
-        
-        #album-cover.loading {
-            background: linear-gradient(135deg, #222, #333) !important;
-        }
-        
-        #album-cover.loading #cover-initial i {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .now-playing-badge {
-            background: linear-gradient(135deg, #ff4d4d, #ff3333);
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 8px;
+        .playlist-info-section {
+            background: rgba(139, 0, 255, 0.05);
             border-radius: 10px;
-            margin-left: 5px;
-            display: none;
+            padding: 20px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -295,18 +277,20 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
                                             </tr>
                                         </thead>
                                         <tbody>
-                                           <?php $contatore = 1; ?>
-                                            <?php foreach ($result_canzoni->fetch_all(MYSQLI_ASSOC) as $canzone): ?>
+                                           <?php 
+                                           $contatore = 1; 
+                                           $playlist_songs = [];
+                                           while ($canzone = $result_canzoni->fetch_assoc()) {
+                                               $playlist_songs[] = $canzone;
+                                           }
+                                           ?>
+                                           
+                                           <?php foreach ($playlist_songs as $index => $canzone): ?>
                                                 <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.2s ease;"
                                                     data-song-id="<?php echo $canzone['id']; ?>"
-                                                    data-song-title="<?php echo htmlspecialchars($canzone['titolo']); ?>"
-                                                    data-song-artist="<?php echo htmlspecialchars($canzone['artista']); ?>"
-                                                    data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>">
+                                                    data-song-index="<?php echo $index; ?>">
                                                     <td class="text-muted" style="padding: 15px; font-weight: 600;">
                                                         <?php echo $contatore++; ?>
-                                                        <span class="now-playing-badge" data-song-id="<?php echo $canzone['id']; ?>">
-                                                            <i class="fas fa-play mr-1"></i>NOW
-                                                        </span>
                                                     </td>
                                                     <td style="padding: 15px;">
                                                         <div>
@@ -333,9 +317,7 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
                                                         <div class="d-flex">
                                                             <button class="btn btn-sm mr-2 btn-play-playlist" 
                                                                     data-song-id="<?php echo $canzone['id']; ?>"
-                                                                    data-song-path="<?php echo htmlspecialchars($canzone['file_path']); ?>"
-                                                                    data-song-title="<?php echo htmlspecialchars($canzone['titolo']); ?>"
-                                                                    data-song-artist="<?php echo htmlspecialchars($canzone['artista']); ?>"
+                                                                    data-song-index="<?php echo $index; ?>"
                                                                     style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 6px 12px;">
                                                                 <i class="fas fa-play mr-1"></i>Riproduci
                                                             </button>
@@ -376,47 +358,77 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
                 </div>
             </div>
 
-            <!-- DESTRA: 25% Player -->
+            <!-- DESTRA: 25% Info playlist -->
             <div class="main-col">
                 <div class="underglow-box full-height">
                     <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
-                        <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-play-circle mr-2"></i>Riproduzione</h3>
+                        <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-info-circle mr-2"></i>Informazioni</h3>
                     </div>
-                    <div class="scrollable-content text-center">
-                        <div id="album-cover" class="mx-auto mb-4" 
-                             style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ccc; border-radius: 12px; background: linear-gradient(135deg, #222, #333); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); overflow: hidden;">
-                            <div id="cover-initial" style="font-size: 72px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">♫</div>
-                            <img id="cover-image" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">
-                        </div>
-                        
-                        <h4 id="titolo-canzone" style="color: #fff; font-weight: 600; margin-bottom: 5px;">Nessun brano</h4>
-                        <p id="artista-canzone" class="text-muted" style="margin-bottom: 20px;">Seleziona una canzone</p>
-                        
-                        <audio id="player" controls class="w-100 mb-4" style="height: 45px; border-radius: 8px; background: rgba(25, 25, 25, 0.8);">
-                            Il tuo browser non supporta l'elemento audio.
-                        </audio>
-                        
-                        <div class="d-flex justify-content-center mb-4">
-                            <button class="btn btn-sm mr-2" onclick="document.getElementById('player').currentTime -= 10" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
-                                <i class="fas fa-backward mr-1"></i>10s
-                            </button>
-                            <button id="play-pause-btn" class="btn btn-sm mr-2" onclick="togglePlayPause()" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 8px 20px;">
-                                <i class="fas fa-play mr-1"></i>Play
-                            </button>
-                            <button class="btn btn-sm" onclick="skipForward()" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
-                                <i class="fas fa-forward mr-1"></i>10s
-                            </button>
-                        </div>
-                        
-                        <hr style="border-color: rgba(139, 0, 255, 0.2); margin: 25px 0;">
-                        
-                        <div class="text-left">
-                            <a href="upload.php" class="d-block mb-3" style="color: #8b00ff; text-decoration: none;">
-                                <i class="fas fa-upload mr-2"></i>Carica canzone
-                            </a>
-                            <a href="index.php" class="d-block" style="color: #ccc; text-decoration: none;">
-                                <i class="fas fa-arrow-left mr-2"></i>Tutte le Playlist
-                            </a>
+                    <div class="scrollable-content">
+                        <div class="p-4">
+                            <div class="playlist-info-section">
+                                <h5 style="color: #d7a3ff; margin-bottom: 15px;"><i class="fas fa-list-alt mr-2"></i>Dettagli Playlist</h5>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Nome</small>
+                                    <p style="color: #fff; font-weight: 500;"><?php echo htmlspecialchars($playlist['nome']); ?></p>
+                                </div>
+                                
+                                <?php if ($playlist['descrizione']): ?>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Descrizione</small>
+                                    <p style="color: #ccc;"><?php echo htmlspecialchars($playlist['descrizione']); ?></p>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Proprietario</small>
+                                    <p style="color: #ccc;">
+                                        <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($playlist['proprietario_nome']); ?>
+                                    </p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Stato</small>
+                                    <p style="color: #ccc;">
+                                        <?php if ($playlist['is_pubblica'] == 1): ?>
+                                            <span class="badge" style="background: rgba(40, 167, 69, 0.2); color: #28a745; border-radius: 20px; padding: 4px 10px;">
+                                                <i class="fas fa-globe mr-1"></i>Pubblica
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge" style="background: rgba(108, 117, 125, 0.2); color: #6c757d; border-radius: 20px; padding: 4px 10px;">
+                                                <i class="fas fa-lock mr-1"></i>Privata
+                                            </span>
+                                        <?php endif; ?>
+                                    </p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Numero canzoni</small>
+                                    <p style="color: #ccc;">
+                                        <i class="fas fa-music mr-1"></i><?php echo $result_canzoni->num_rows; ?> canzoni
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <hr style="border-color: rgba(139, 0, 255, 0.2); margin: 25px 0;">
+                            
+                            <div>
+                                <h5 style="color: #d7a3ff; margin-bottom: 15px;"><i class="fas fa-headphones mr-2"></i>Player Globale</h5>
+                                <p style="color: #ccc; font-size: 0.9rem;">
+                                    Il player è sempre disponibile nella barra in basso. Puoi continuare ad ascoltare la musica mentre navighi nel sito.
+                                </p>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-sm w-100 mb-2" onclick="sendToGlobalPlayer({type: 'GLOBAL_PLAYER_TOGGLE'})" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 8px;">
+                                        <i class="fas fa-play mr-1"></i>Play/Pausa
+                                    </button>
+                                    
+                                    <button class="btn btn-sm w-100" onclick="sendToGlobalPlayer({type: 'GLOBAL_PLAYER_STOP'})" style="background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.3); border-radius: 6px; padding: 8px;">
+                                        <i class="fas fa-stop mr-1"></i>Ferma
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -462,7 +474,7 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
                                     <?php endwhile; ?>
                                 </select>
                                 <small class="text-muted mt-2 d-block">
-                                    <i class="fas fa-info-circle mr-1"></i>Tieni premuto Ctrl (o Cmd su Mac) per selezionare più canzoni
+                                    <i class="fas fa-info-circle mr-1"></i>Tieni premuto Ctrl (or Cmd su Mac) per selezionare più canzoni
                                 </small>
                             </div>
                         </form>
@@ -493,239 +505,155 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
         </div>
     </div>
 
+    <!-- IFRAME per il player globale -->
+    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>
+
     <script>
-    // Variabili globali
-    let currentSongId = null;
-    let currentRow = null;
+    // Funzione per comunicare con il player globale
+    // Funzione per comunicare con il player globale
+// In tutte le pagine, verifica che il path sia corretto:
+function sendToGlobalPlayer(message) {
+    const iframe = document.getElementById('global-player-frame');
     
-    // Funzione per riprodurre una canzone singola
-    function riproduciCanzoneSingola(songId, filePath, titolo, artista) {
-        const player = document.getElementById('player');
-        
-        // Se è la stessa canzone già in riproduzione, gestisci play/pause
-        if (currentSongId === songId) {
-            if (player.paused) {
-                player.play();
-                updatePlayButton(true);
-            } else {
-                player.pause();
-                updatePlayButton(false);
-            }
-            return;
-        }
-        
-        currentSongId = songId;
-        
-        const source = document.createElement('source');
-        source.src = filePath;
-        source.type = 'audio/mpeg';
-        
-        // Rimuovi vecchie sorgenti
-        while(player.firstChild) {
-            player.removeChild(player.firstChild);
-        }
-        
-        player.appendChild(source);
-        player.load();
-        player.play();
-        
-        // Aggiorna UI
-        document.getElementById('titolo-canzone').textContent = titolo;
-        document.getElementById('artista-canzone').textContent = artista;
-        updatePlayButton(true);
-        
-        // CARICA LA COPERTINA
-        caricaCopertinaCanzone(songId, titolo);
-        
-        // Aggiorna stato riga
-        updateCurrentRow(songId);
-        
-        // Listener per quando la canzone finisce
-        player.onended = function() {
-            playNextSong();
-        };
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(message, '*');
     }
     
-    // Funzione per caricare la copertina
-    function caricaCopertinaCanzone(songId, titolo) {
-        const albumCover = document.getElementById('album-cover');
-        const coverImage = document.getElementById('cover-image');
-        const coverInitial = document.getElementById('cover-initial');
-        
-        // Mostra loader
-        albumCover.classList.add('loading');
-        coverImage.style.display = 'none';
-        coverInitial.style.display = 'flex';
-        coverInitial.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        
-        // Imposta la copertina con timestamp per evitare cache
-        const coverUrl = 'extract_cover.php?song_id=' + songId + '&t=' + new Date().getTime();
-        
-        // Precarica l'immagine
-        const img = new Image();
-        img.onload = function() {
-            // Quando l'immagine è caricata, mostrala
-            albumCover.classList.remove('loading');
-            coverImage.src = coverUrl;
-            coverImage.style.display = 'block';
-            coverInitial.style.display = 'none';
-            coverInitial.innerHTML = '';
-        };
-        
-        img.onerror = function() {
-            // Se non c'è copertina, mostra iniziale del titolo
-            albumCover.classList.remove('loading');
-            coverImage.style.display = 'none';
-            coverInitial.innerHTML = titolo.charAt(0).toUpperCase();
-            coverInitial.style.display = 'flex';
-            albumCover.style.background = 'linear-gradient(135deg, #8b00ff, #7000d4)';
-        };
-        
-        img.src = coverUrl;
-    }
-    
-    // Funzione per aggiornare il pulsante play/pause
-    function updatePlayButton(isPlaying) {
-        const playBtn = document.getElementById('play-pause-btn');
-        if (isPlaying) {
-            playBtn.innerHTML = '<i class="fas fa-pause mr-1"></i>Pausa';
-            playBtn.style.background = 'linear-gradient(135deg, #ff4d4d, #ff3333)';
-        } else {
-            playBtn.innerHTML = '<i class="fas fa-play mr-1"></i>Play';
-            playBtn.style.background = 'linear-gradient(135deg, #8b00ff, #7000d4)';
-        }
-    }
-    
-    // Funzione toggle play/pause
-    function togglePlayPause() {
-        const player = document.getElementById('player');
-        if (player.paused) {
-            player.play();
-            updatePlayButton(true);
-        } else {
-            player.pause();
-            updatePlayButton(false);
-        }
-    }
-    
-    // Funzione skip forward
-    function skipForward() {
-        const player = document.getElementById('player');
-        player.currentTime = Math.min(player.duration, player.currentTime + 10);
-    }
-    
-    // Funzione per aggiornare la riga corrente
-    function updateCurrentRow(songId) {
-        // Rimuovi evidenziazione da tutte le righe
-        document.querySelectorAll('tbody tr').forEach(row => {
-            row.classList.remove('song-playing-row');
-            const badge = row.querySelector('.now-playing-badge');
-            if (badge) badge.style.display = 'none';
-        });
-        
-        // Rimuovi classe playing da tutti i pulsanti
-        document.querySelectorAll('.btn-play-playlist').forEach(btn => {
-            btn.classList.remove('playing');
-            btn.innerHTML = '<i class="fas fa-play mr-1"></i>Riproduci';
-        });
-        
-        // Evidenzia la riga corrente
-        const rows = document.querySelectorAll('tbody tr');
-        for (let row of rows) {
-            if (row.getAttribute('data-song-id') == songId) {
-                row.classList.add('song-playing-row');
-                const badge = row.querySelector('.now-playing-badge');
-                if (badge) badge.style.display = 'inline-block';
+    // DEBUG: mostra in console cosa stiamo inviando
+    console.log("Inviato al player:", message);
+}
+
+// Al caricamento di ogni pagina, controlla se c'è una canzone in riproduzione
+document.addEventListener('DOMContentLoaded', function() {
+    // Controlla se c'è una canzone pendente da caricare
+    const pendingSong = localStorage.getItem('pending_song');
+    if (pendingSong) {
+        try {
+            const data = JSON.parse(pendingSong);
+            if (data.song) {
+                // Attendi che l'iframe sia pronto
+                const checkIframe = setInterval(() => {
+                    const iframe = document.getElementById('global-player-frame');
+                    if (iframe && iframe.contentWindow) {
+                        clearInterval(checkIframe);
+                        sendToGlobalPlayer({
+                            type: 'GLOBAL_PLAYER_PLAY_SONG',
+                            song: data.song,
+                            playlist: data.playlist,
+                            currentIndex: data.index
+                        });
+                    }
+                }, 100);
                 
-                const playBtn = row.querySelector('.btn-play-playlist');
-                if (playBtn) {
-                    playBtn.classList.add('playing');
-                    playBtn.innerHTML = '<i class="fas fa-pause mr-1"></i>Pausa';
-                }
-                currentRow = row;
-                break;
+                // Timeout dopo 3 secondi
+                setTimeout(() => clearInterval(checkIframe), 3000);
             }
+        } catch (error) {
+            console.error("Errore nel parsing della canzone pendente:", error);
         }
     }
     
-    // Funzione per riprodurre la canzone successiva
-    function playNextSong() {
-        if (currentRow) {
-            const nextRow = currentRow.nextElementSibling;
-            if (nextRow) {
-                const songId = nextRow.getAttribute('data-song-id');
-                const filePath = nextRow.getAttribute('data-song-path');
-                const titolo = nextRow.getAttribute('data-song-title');
-                const artista = nextRow.getAttribute('data-song-artist');
-                
-                riproduciCanzoneSingola(songId, filePath, titolo, artista);
-            }
-        }
-    }
-    
-    // Funzione per riprodurre tutta la playlist
-    function riproduciTuttaPlaylist() {
-        const firstRow = document.querySelector('tbody tr');
-        if (firstRow) {
-            const songId = firstRow.getAttribute('data-song-id');
-            const filePath = firstRow.getAttribute('data-song-path');
-            const titolo = firstRow.getAttribute('data-song-title');
-            const artista = firstRow.getAttribute('data-song-artist');
+    // Ascolta messaggi dal player
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
+            // Il player ci informa dello stato corrente
+            console.log("Stato player aggiornato:", event.data);
             
-            riproduciCanzoneSingola(songId, filePath, titolo, artista);
-        } else {
-            alert('La playlist è vuota');
+            // Puoi aggiornare l'UI se necessario (evidenziare canzone corrente, etc.)
+            if (event.data.song) {
+                // Rimuovi evidenziazione da tutte le canzoni
+                document.querySelectorAll('.song-playing, .current-song-highlight').forEach(el => {
+                    el.classList.remove('song-playing', 'current-song-highlight');
+                });
+                
+                // Evidenzia canzone corrente
+                const currentSongElement = document.querySelector(`[data-song-id="${event.data.song.id}"]`);
+                if (currentSongElement) {
+                    currentSongElement.classList.add('song-playing', 'current-song-highlight');
+                }
+            }
         }
-    }
+    });
+});
+    
+    // Ottieni tutte le canzoni della playlist per JavaScript
+    const playlistSongs = [
+        <?php 
+        foreach ($playlist_songs as $index => $canzone) {
+            echo "{
+                id: {$canzone['id']},
+                titolo: '" . addslashes($canzone['titolo']) . "',
+                artista: '" . addslashes($canzone['artista']) . "',
+                file_path: '" . addslashes($canzone['file_path']) . "',
+                index: {$index}
+            },";
+        }
+        ?>
+    ];
     
     // Event listener quando il DOM è caricato
     document.addEventListener('DOMContentLoaded', function() {
         // Event listener per i pulsanti Riproduci
         document.querySelectorAll('.btn-play-playlist').forEach(button => {
             button.addEventListener('click', function() {
-                const songId = this.getAttribute('data-song-id');
-                const filePath = this.getAttribute('data-song-path');
-                const titolo = this.getAttribute('data-song-title');
-                const artista = this.getAttribute('data-song-artist');
+                const songId = parseInt(this.getAttribute('data-song-id'));
+                const songIndex = parseInt(this.getAttribute('data-song-index'));
                 
-                riproduciCanzoneSingola(songId, filePath, titolo, artista);
+                // Trova la canzone nell'array
+                const song = playlistSongs.find(s => s.id === songId);
+                
+                if (song) {
+                    // Invia la canzone al player globale
+                    sendToGlobalPlayer({
+                        type: 'GLOBAL_PLAYER_PLAY_SONG',
+                        song: song
+                    });
+                    
+                    // Imposta l'intera playlist
+                    sendToGlobalPlayer({
+                        type: 'GLOBAL_PLAYER_SET_PLAYLIST',
+                        playlist: playlistSongs,
+                        currentIndex: songIndex
+                    });
+                }
             });
         });
         
         // Event listener per il pulsante Riproduci Tutta
-        document.getElementById('btnRiproduciTutta').addEventListener('click', riproduciTuttaPlaylist);
-        
-        // Event listener per tasti da tastiera
-        document.addEventListener('keydown', function(e) {
-            // Spazio per play/pause
-            if (e.code === 'Space' && !e.target.matches('input, textarea, button, select')) {
-                e.preventDefault();
-                togglePlayPause();
-            }
-            // Freccia destra + Ctrl per skip forward
-            if (e.code === 'ArrowRight' && e.ctrlKey) {
-                e.preventDefault();
-                skipForward();
-            }
-            // Freccia sinistra + Ctrl per skip backward
-            if (e.code === 'ArrowLeft' && e.ctrlKey) {
-                e.preventDefault();
-                document.getElementById('player').currentTime -= 10;
+        document.getElementById('btnRiproduciTutta').addEventListener('click', function() {
+            if (playlistSongs.length > 0) {
+                // Invia la prima canzone al player globale
+                sendToGlobalPlayer({
+                    type: 'GLOBAL_PLAYER_PLAY_SONG',
+                    song: playlistSongs[0]
+                });
+                
+                // Imposta l'intera playlist
+                sendToGlobalPlayer({
+                    type: 'GLOBAL_PLAYER_SET_PLAYLIST',
+                    playlist: playlistSongs,
+                    currentIndex: 0
+                });
+            } else {
+                alert('La playlist è vuota');
             }
         });
         
-        // Migliora l'aspetto delle righe al passaggio del mouse
-        document.querySelectorAll('tbody tr').forEach(row => {
-            row.addEventListener('mouseenter', function() {
-                if (!this.classList.contains('song-playing-row')) {
-                    this.style.backgroundColor = 'rgba(139, 0, 255, 0.08)';
-                }
-            });
-            row.addEventListener('mouseleave', function() {
-                if (!this.classList.contains('song-playing-row')) {
-                    this.style.backgroundColor = '';
-                }
-            });
+        // Ascolta messaggi dal player globale
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'GLOBAL_PLAYER_SONG_CHANGED') {
+                // Puoi aggiornare l'UI se necessario
+                console.log('Canzone cambiata:', event.data.song);
+            }
+        });
+        
+        // Tasti da tastiera
+        document.addEventListener('keydown', function(e) {
+            // Spazio per play/pause globale
+            if (e.key === ' ' && !e.target.matches('input, textarea, select')) {
+                e.preventDefault();
+                sendToGlobalPlayer({type: 'GLOBAL_PLAYER_TOGGLE'});
+            }
         });
     });
     

@@ -159,6 +159,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="style2.css">
     <!-- Font Awesome per icone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <!-- IFRAME per il player globale -->
+    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>
+    
+    <!-- Aggiungi questo allo style nel <head> -->
+    <style>
+        body {
+            padding-bottom: 100px !important;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar FISSA -->
