@@ -188,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="main-col" style="flex: 0 0 100%;">
                 <div class="underglow-box full-height">
                     <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
-                        <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-upload mr-2"></i>Carica Nuova Canzone</h3>
+                        <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-upload mr-2"></i> Carica Nuova Canzone</h3>
                         <small class="text-muted">Condividi la tua musica con la community</small>
                     </div>
 
@@ -209,10 +209,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <strong><i class="fas fa-check-circle mr-2"></i>Successo!</strong> Canzone caricata correttamente.
                                 <div class="mt-3">
                                     <a href="index.php" class="btn btn-sm mr-2" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 15px;">
-                                        <i class="fas fa-home mr-1"></i>Torna alla Home
+                                        <i class="fas fa-home mr-1"></i> Torna alla Home
                                     </a>
                                     <a href="upload.php" class="btn btn-sm" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 6px; padding: 8px 15px;">
-                                        <i class="fas fa-plus mr-1"></i>Carica un'altra canzone
+                                        <i class="fas fa-plus mr-1"></i> Carica un'altra canzone
                                     </a>
                                 </div>
                             </div>
@@ -270,11 +270,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                            accept=".mp3,.wav,.ogg" required style="background: rgba(25, 25, 25, 0.9); color: #fff; border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
                                     <div class="mt-2">
                                         <div class="alert alert-dark p-3" style="background: rgba(30, 30, 30, 0.9); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 8px;">
-                                            <p class="mb-1"><strong><i class="fas fa-info-circle mr-2"></i>Informazioni file:</strong></p>
+                                            <p class="mb-1"><strong><i class="fas fa-info-circle mr-2"></i> Informazioni file:</strong></p>
                                             <ul class="mb-0 pl-3">
-                                                <li><strong>Formati supportati:</strong> MP3, WAV, OGG</li>
-                                                <li><strong>Dimensione massima:</strong> 20MB</li>
-                                                <li><strong>Sicurezza:</strong> Il file verrà salvato con un nome crittografato</li>
+                                                <strong>- Formati supportati:</strong> MP3, WAV, OGG <br>
+                                                <strong>- Dimensione massima:</strong> 20MB<br>
+                                                <strong>- Sicurezza:</strong> Il file verrà salvato con un nome crittografato
                                             </ul>
                                         </div>
                                     </div>
@@ -283,11 +283,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #8b00ff, #7000d4); color: white; border: none; border-radius: 8px; padding: 12px; font-weight: 600; margin-bottom: 10px;">
-                                    <i class="fas fa-upload mr-2"></i>Carica Canzone
+                                    <i class="fas fa-upload mr-2"></i> Carica Canzone
                                 </button>
 
                                 <a href="index.php" class="btn btn-dark" style="background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px;">
-                                    <i class="fas fa-arrow-left mr-2"></i>Torna alla Home
+                                    <i class="fas fa-arrow-left mr-2"></i> Torna alla Home
                                 </a>
                             </div>
                         </form>
