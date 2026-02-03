@@ -823,7 +823,7 @@
             }
         }
 
-        // All'inizio della pagina, aggiungi questo:
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Controlla se ci sono comandi pendenti
             const pendingCommand = localStorage.getItem('pending_player_command');
@@ -841,7 +841,7 @@
             window.addEventListener('message', function(event) {
                 if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
                     console.log("Aggiornamento stato player:", event.data);
-                    // Puoi aggiornare UI qui se necessario
+                    
                 }
             });
         });
