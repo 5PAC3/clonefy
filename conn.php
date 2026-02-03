@@ -2,6 +2,6 @@
     // Connessione al database
     $host = "localhost";
     $user = "root";
-    $db_password = "";
+    $db_password = "tiamotilda";
     $database = "clonefy";
 ?>
