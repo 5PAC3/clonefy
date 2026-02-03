@@ -213,20 +213,20 @@
     </iframe>    
     <style>
         .song-playing {
-    background: rgba(139, 0, 255, 0.1) !important;
-    border-left: 3px solid #8b00ff !important;
-}
+            background: rgba(139, 0, 255, 0.1) !important;
+            border-left: 3px solid #8b00ff !important;
+        }
 
-.song-playing-row {
-    background: rgba(139, 0, 255, 0.1) !important;
-    border-left: 3px solid #8b00ff !important;
-}
+        .song-playing-row {
+            background: rgba(139, 0, 255, 0.1) !important;
+            border-left: 3px solid #8b00ff !important;
+        }
 
-.btn-play-playlist.playing,
-.btn-play-search.playing {
-    background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
-}
-        
+        .btn-play-playlist.playing,
+        .btn-play-search.playing {
+            background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
+        }
+                
         /* Stili per card quadrate compatte */
         .song-card-squared {
             border-radius: 10px;
@@ -803,30 +803,7 @@
                                 </div>
                             <?php endif; ?>
                             
-                            <!-- Info box per l'ordine dei risultati -->
-                            <div class="alert alert-info mt-4" style="background: rgba(139, 0, 255, 0.1); border-left: 4px solid #8b00ff; border-radius: 8px;">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-sort-amount-down mr-3" style="font-size: 24px; color: #8b00ff;"></i>
-                                    <div>
-                                        <strong>Ordine dei risultati:</strong><br>
-                                        <small class="text-muted">
-                                            1. Canzoni con nome corrispondente → 
-                                            2. Canzoni dell'artista corrispondente → 
-                                            3. Canzoni del genere corrispondente
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Info box per aggiungere a playlist -->
-                            <div class="alert alert-dark mt-3" style="background: rgba(30, 30, 30, 0.8); border-left: 4px solid #555; border-radius: 8px;">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                <strong>Vuoi aggiungere una canzone a una playlist?</strong><br>
-                                <small class="text-muted">
-                                    Vai nelle tue <a href="index.php" style="color: #d7a3ff; font-weight: 500;">playlist</a>, 
-                                    selezionane una e usa il pulsante "Aggiungi Canzoni" per scegliere tra tutte le canzoni disponibili.
-                                </small>
-                            </div>
+                        
                             
                         <?php elseif (!empty($messaggio)): ?>
                             <div class="text-center py-5">
