@@ -1,89 +1,89 @@
 <?php
-session_start();
-require_once 'auth.php';
-require_once 'conn.php';
+    session_start();
+    require_once 'auth.php';
+    require_once 'conn.php';
 
-// Connessione al DB
-$conn = new mysqli($host, $user, $db_password, $database);
-$user_id = $_SESSION['id'];
+    // Connessione al DB
+    $conn = new mysqli($host, $user, $db_password, $database);
+    $user_id = $_SESSION['id'];
 
-// Parametri di ricerca
-$query = isset($_GET['q']) ? trim($_GET['q']) : '';
-$risultati = [];
-$messaggio = '';
+    // Parametri di ricerca
+    $query = isset($_GET['q']) ? trim($_GET['q']) : '';
+    $risultati = [];
+    $messaggio = '';
 
-if (!empty($query)) {
-    // Preparazione della query di ricerca con ORDINE DI PRIORITÀ
-    $search_query = "%" . $query . "%";
-    
-    // Query UNICA con priorità: 1. titolo, 2. artista, 3. genere
-    $stmt = $conn->prepare("
-        SELECT s.*, u.username as caricato_da,
-               CASE 
-                   WHEN s.titolo LIKE ? THEN 1
-                   WHEN s.artista LIKE ? THEN 2
-                   WHEN s.genere LIKE ? THEN 3
-               END as priorita,
-               CASE 
-                   WHEN s.titolo LIKE ? THEN 'titolo'
-                   WHEN s.artista LIKE ? THEN 'artista'
-                   WHEN s.genere LIKE ? THEN 'genere'
-               END as tipo_risultato
-        FROM songs s
-        LEFT JOIN users u ON s.user_id = u.id
-        WHERE s.titolo LIKE ? OR s.artista LIKE ? OR s.genere LIKE ?
-        ORDER BY priorita ASC, s.titolo ASC
-    ");
-    
-    // Bind parameters (9 parametri totali)
-    $stmt->bind_param("sssssssss", 
-        $search_query,  // CASE titolo (priorita)
-        $search_query,  // CASE artista (priorita)  
-        $search_query,  // CASE genere (priorita)
-        $search_query,  // CASE titolo (tipo_risultato)
-        $search_query,  // CASE artista (tipo_risultato)
-        $search_query,  // CASE genere (tipo_risultato)
-        $search_query,  // WHERE titolo
-        $search_query,  // WHERE artista
-        $search_query   // WHERE genere
-    );
-    
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
-        // Raggruppa risultati per tipo per la visualizzazione
-        $risultati_titolo = [];
-        $risultati_artista = [];
-        $risultati_genere = [];
+    if (!empty($query)) {
+        // Preparazione della query di ricerca con ORDINE DI PRIORITÀ
+        $search_query = "%" . $query . "%";
         
-        while ($row = $result->fetch_assoc()) {
-            switch ($row['priorita']) {
-                case 1:
-                    $risultati_titolo[] = $row;
-                    break;
-                case 2:
-                    $risultati_artista[] = $row;
-                    break;
-                case 3:
-                    $risultati_genere[] = $row;
-                    break;
+        // Query UNICA con priorità: 1. titolo, 2. artista, 3. genere
+        $stmt = $conn->prepare("
+            SELECT s.*, u.username as caricato_da,
+                CASE 
+                    WHEN s.titolo LIKE ? THEN 1
+                    WHEN s.artista LIKE ? THEN 2
+                    WHEN s.genere LIKE ? THEN 3
+                END as priorita,
+                CASE 
+                    WHEN s.titolo LIKE ? THEN 'titolo'
+                    WHEN s.artista LIKE ? THEN 'artista'
+                    WHEN s.genere LIKE ? THEN 'genere'
+                END as tipo_risultato
+            FROM songs s
+            LEFT JOIN users u ON s.user_id = u.id
+            WHERE s.titolo LIKE ? OR s.artista LIKE ? OR s.genere LIKE ?
+            ORDER BY priorita ASC, s.titolo ASC
+        ");
+        
+        // Bind parameters (9 parametri totali)
+        $stmt->bind_param("sssssssss", 
+            $search_query,  // CASE titolo (priorita)
+            $search_query,  // CASE artista (priorita)  
+            $search_query,  // CASE genere (priorita)
+            $search_query,  // CASE titolo (tipo_risultato)
+            $search_query,  // CASE artista (tipo_risultato)
+            $search_query,  // CASE genere (tipo_risultato)
+            $search_query,  // WHERE titolo
+            $search_query,  // WHERE artista
+            $search_query   // WHERE genere
+        );
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            // Raggruppa risultati per tipo per la visualizzazione
+            $risultati_titolo = [];
+            $risultati_artista = [];
+            $risultati_genere = [];
+            
+            while ($row = $result->fetch_assoc()) {
+                switch ($row['priorita']) {
+                    case 1:
+                        $risultati_titolo[] = $row;
+                        break;
+                    case 2:
+                        $risultati_artista[] = $row;
+                        break;
+                    case 3:
+                        $risultati_genere[] = $row;
+                        break;
+                }
+                $risultati[] = $row; // Tutti i risultati insieme
             }
-            $risultati[] = $row; // Tutti i risultati insieme
+            
+            // Contatori per le categorie
+            $conteggio_titolo = count($risultati_titolo);
+            $conteggio_artista = count($risultati_artista);
+            $conteggio_genere = count($risultati_genere);
+            
+        } else {
+            $messaggio = "Nessun risultato trovato per: <strong>" . htmlspecialchars($query) . "</strong>";
         }
-        
-        // Contatori per le categorie
-        $conteggio_titolo = count($risultati_titolo);
-        $conteggio_artista = count($risultati_artista);
-        $conteggio_genere = count($risultati_genere);
-        
+        $stmt->close();
     } else {
-        $messaggio = "Nessun risultato trovato per: <strong>" . htmlspecialchars($query) . "</strong>";
+        $messaggio = "Inserisci un termine di ricerca nella barra sopra.";
     }
-    $stmt->close();
-} else {
-    $messaggio = "Inserisci un termine di ricerca nella barra sopra.";
-}
 
 ?>
 
