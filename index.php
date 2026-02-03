@@ -345,7 +345,7 @@
     <div class="main-container" style="position: absolute; top: 70px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 70px); padding: 20px;">
         <div class="main-row">
             <!-- SINISTRA: 75% Playlist -->
-            <div class="main-col">
+            <div class="main-col" style="flex: 0 0 100%;">
                 <div class="underglow-box full-height">
                     <!-- HEADER CON RICERCA PLAYLIST -->
                     <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2); padding-bottom: 15px;">
