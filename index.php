@@ -1,71 +1,71 @@
 <?php
-if(!isset($_SESSION))
-    session_start();    
+    if(!isset($_SESSION))
+        session_start();    
 
-require_once 'conn.php';
-require_once 'auth.php';
+    require_once 'conn.php';
+    require_once 'auth.php';
 
-// Connessione al DB per prendere le playlist dell'utente
-$conn = new mysqli($host, $user, $db_password, $database);
-$user_id = $_SESSION['id'];
+    // Connessione al DB per prendere le playlist dell'utente
+    $conn = new mysqli($host, $user, $db_password, $database);
+    $user_id = $_SESSION['id'];
 
-// Parametro di ricerca playlist
-$search_playlist = isset($_GET['search_playlist']) ? trim($_GET['search_playlist']) : '';
+    // Parametro di ricerca playlist
+    $search_playlist = isset($_GET['search_playlist']) ? trim($_GET['search_playlist']) : '';
 
-// Query: playlist di cui l'utente è proprietario O collaboratore
-$query_base = "SELECT p.id, p.nome, p.descrizione, p.user_id as proprietario_id, 
-                 u.username as proprietario_nome,
-                 COUNT(ps.song_id) as num_canzoni,
-                 CASE 
-                    WHEN p.user_id = ? THEN 'proprietario'
-                    ELSE 'collaboratore'
-                 END as ruolo
-          FROM playlists p 
-          LEFT JOIN playlist_songs ps ON p.id = ps.playlist_id 
-          LEFT JOIN users u ON p.user_id = u.id
-          WHERE p.user_id = ? 
-             OR p.id IN (SELECT playlist_id FROM user_playlist_membership WHERE user_id = ?)";
+    // Query: playlist di cui l'utente è proprietario O collaboratore
+    $query_base = "SELECT p.id, p.nome, p.descrizione, p.user_id as proprietario_id, 
+                    u.username as proprietario_nome,
+                    COUNT(ps.song_id) as num_canzoni,
+                    CASE 
+                        WHEN p.user_id = ? THEN 'proprietario'
+                        ELSE 'collaboratore'
+                    END as ruolo
+            FROM playlists p 
+            LEFT JOIN playlist_songs ps ON p.id = ps.playlist_id 
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.user_id = ? 
+                OR p.id IN (SELECT playlist_id FROM user_playlist_membership WHERE user_id = ?)";
 
-// Aggiungi filtro ricerca se presente
-$params = [$user_id, $user_id, $user_id];
-$param_types = "iii";
+    // Aggiungi filtro ricerca se presente
+    $params = [$user_id, $user_id, $user_id];
+    $param_types = "iii";
 
-if (!empty($search_playlist)) {
-    $query_base .= " AND (p.nome LIKE ? OR p.descrizione LIKE ?)";
-    $search_term = "%" . $search_playlist . "%";
-    $params[] = $search_term;
-    $params[] = $search_term;
-    $param_types .= "ss";
-}
+    if (!empty($search_playlist)) {
+        $query_base .= " AND (p.nome LIKE ? OR p.descrizione LIKE ?)";
+        $search_term = "%" . $search_playlist . "%";
+        $params[] = $search_term;
+        $params[] = $search_term;
+        $param_types .= "ss";
+    }
 
-$query_base .= " GROUP BY p.id ORDER BY p.created_at DESC";
+    $query_base .= " GROUP BY p.id ORDER BY p.created_at DESC";
 
-$stmt = $conn->prepare($query_base);
+    $stmt = $conn->prepare($query_base);
 
-// Bind dinamico dei parametri
-if (count($params) > 0) {
-    $stmt->bind_param($param_types, ...$params);
-}
+    // Bind dinamico dei parametri
+    if (count($params) > 0) {
+        $stmt->bind_param($param_types, ...$params);
+    }
 
-$stmt->execute();
-$result = $stmt->get_result();
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-// Messaggi da URL (per successo/errore dopo creazione playlist)
-$messaggio = '';
-if (isset($_GET['success']) && $_GET['success'] == 'playlist_creata') {
-    $messaggio = '<div class="alert alert-success" style="border-left: 4px solid #28a745; background: rgba(40, 167, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-check-circle mr-2"></i>Playlist creata con successo!</div>';
-}
-if (isset($_GET['error'])) {
-    $messaggio = '<div class="alert alert-danger" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-exclamation-triangle mr-2"></i>Errore: ' . htmlspecialchars($_GET['error']) . '</div>';
-}
+    // Messaggi da URL (per successo/errore dopo creazione playlist)
+    $messaggio = '';
+    if (isset($_GET['success']) && $_GET['success'] == 'playlist_creata') {
+        $messaggio = '<div class="alert alert-success" style="border-left: 4px solid #28a745; background: rgba(40, 167, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-check-circle mr-2"></i>Playlist creata con successo!</div>';
+    }
+    if (isset($_GET['error'])) {
+        $messaggio = '<div class="alert alert-danger" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-exclamation-triangle mr-2"></i>Errore: ' . htmlspecialchars($_GET['error']) . '</div>';
+    }
 
-// Aggiungi questi nuovi messaggi di errore:
-if (isset($_GET['error']) && $_GET['error'] == 'nome_troppo_lungo') {
-    $messaggio = '<div class="alert alert-danger" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-exclamation-triangle mr-2"></i>Il nome della playlist non può superare 100 caratteri</div>';
-}
-if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
-    $messaggio = '<div class="alert alert-danger" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-exclamation-triangle mr-2"></i>La descrizione è troppo lunga</div>';
-}
+    // Aggiungi questi nuovi messaggi di errore:
+    if (isset($_GET['error']) && $_GET['error'] == 'nome_troppo_lungo') {
+        $messaggio = '<div class="alert alert-danger" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-exclamation-triangle mr-2"></i>Il nome della playlist non può superare 100 caratteri</div>';
+    }
+    if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
+        $messaggio = '<div class="alert alert-danger" style="border-left: 4px solid #dc3545; background: rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 12px;"><i class="fas fa-exclamation-triangle mr-2"></i>La descrizione è troppo lunga</div>';
+    }
 
 ?>
 
@@ -107,7 +107,7 @@ if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
             window.addEventListener('message', function(event) {
                 if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
                     console.log("Aggiornamento stato player:", event.data);
-                    // Puoi aggiornare UI qui se necessario
+                    
                 }
             });
         });
@@ -196,19 +196,19 @@ if (isset($_GET['error']) && $_GET['error'] == 'descrizione_troppo_lunga') {
     </iframe>
     <style>
         .song-playing {
-    background: rgba(139, 0, 255, 0.1) !important;
-    border-left: 3px solid #8b00ff !important;
-}
+            background: rgba(139, 0, 255, 0.1) !important;
+            border-left: 3px solid #8b00ff !important;
+        }
 
-.song-playing-row {
-    background: rgba(139, 0, 255, 0.1) !important;
-    border-left: 3px solid #8b00ff !important;
-}
+        .song-playing-row {
+            background: rgba(139, 0, 255, 0.1) !important;
+            border-left: 3px solid #8b00ff !important;
+        }
 
-.btn-play-playlist.playing,
-.btn-play-search.playing {
-    background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
-}
+        .btn-play-playlist.playing,
+        .btn-play-search.playing {
+            background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
+        }
         .cover-loading {
             position: relative;
         }
