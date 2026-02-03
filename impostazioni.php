@@ -144,7 +144,7 @@ $utente = $result_utente->fetch_assoc();
     <div class="main-container" style="position: absolute; top: 70px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 70px); padding: 20px;">
         <div class="main-row">
             <!-- SINISTRA: 75% Impostazioni -->
-            <div class="main-col">
+            <div class="main-col" style="padding: 30px">
                 <div class="underglow-box full-height">
                     <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
                         <div class="d-flex justify-content-between align-items-center">
@@ -260,7 +260,7 @@ $utente = $result_utente->fetch_assoc();
             </div>
 
             <!-- DESTRA: 25% Aiuto e consigli -->
-            <div class="main-col">
+            <div class="main-col" style="padding: 30px">
                 <div class="underglow-box full-height">
                     <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
                         <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-life-ring mr-2"></i>Aiuto & Consigli</h3>

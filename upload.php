@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Container principale SPAZIATO DALLA NAVBAR -->
     <div class="main-container" style="position: absolute; top: 70px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 70px); padding: 20px;">
         <div class="main-row">
-            <div class="main-col" style="flex: 0 0 100%;">
+            <div class="main-col" style="flex: 0 0 100%; padding: 30px">
                 <div class="underglow-box full-height">
                     <div class="content-header" style="border-bottom: 1px solid rgba(139, 0, 255, 0.2);">
                         <h3 style="color: #d7a3ff; margin: 0;"><i class="fas fa-upload mr-2"></i> Carica Nuova Canzone</h3>
