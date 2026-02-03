@@ -89,12 +89,7 @@ $utente = $result_utente->fetch_assoc();
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
         <!-- IFRAME per il player globale -->
-    <iframe id="global-player-frame" 
-        src="player_bar.php" 
-        style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"
-        onload="this.style.visibility='visible';"
-        allow="autoplay">
-</iframe>
+    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>
     
     <!-- Aggiungi questo allo style nel <head> -->
     <style>

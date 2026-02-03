@@ -1,15 +1,14 @@
 <?php
-// Controllo di autenticazione 
-require_once('auth.php'); 
-
-// Connessione al database
+// stream.php
+session_start();
+require_once('auth.php');
 require_once('conn.php');
-$conn = new mysqli($host, $user, $db_password, $database);
 
 if (isset($_GET['id'])) {
     $songId = intval($_GET['id']);
 
-    // Recupera il percorso del file dal DB usando l'ID
+    $conn = new mysqli($host, $user, $db_password, $database);
+    
     $stmt = $conn->prepare("SELECT file_path FROM songs WHERE id = ?");
     $stmt->bind_param("i", $songId);
     $stmt->execute();
@@ -18,58 +17,54 @@ if (isset($_GET['id'])) {
     if ($row = $result->fetch_assoc()) {
         $path = $row['file_path'];
         
-        // Debug: verifica se il file esiste
-        if (file_exists($path)) {
-            // Determina il tipo MIME in base all'estensione
-            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            $mime_types = [
-                'mp3' => 'audio/mpeg',
-                'wav' => 'audio/wav',
-                'ogg' => 'audio/ogg'
-            ];
-            
-            $mime_type = $mime_types[$extension] ?? 'audio/mpeg';
-            
-            // Imposta gli header per il flusso audio
-            header("Content-Type: $mime_type");
-            header("Content-Length: " . filesize($path));
-            header("Content-Disposition: inline; filename=\"" . basename($path) . "\"");
-            header("Cache-Control: public, max-age=31536000");
-            
-            // Legge e invia il file
-            readfile($path);
-            exit;
-        } else {
-            // File non trovato, prova un percorso relativo
-            $relative_path = '.' . $path;
-            if (file_exists($relative_path)) {
-                $path = $relative_path;
-                $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-                $mime_types = [
-                    'mp3' => 'audio/mpeg',
-                    'wav' => 'audio/wav',
-                    'ogg' => 'audio/ogg'
-                ];
-                
-                $mime_type = $mime_types[$extension] ?? 'audio/mpeg';
-                
-                header("Content-Type: $mime_type");
-                header("Content-Length: " . filesize($path));
-                header("Content-Disposition: inline; filename=\"" . basename($path) . "\"");
-                header("Cache-Control: public, max-age=31536000");
-                
-                readfile($path);
-                exit;
-            } else {
-                error_log("File non trovato: " . $path);
-                http_response_code(404);
-                echo "File audio non trovato";
-            }
+        // Rimuovi eventuale './' all'inizio
+        $path = ltrim($path, './');
+        
+        // Se non inizia con 'canzoni/', aggiungilo
+        if (strpos($path, 'canzoni/') !== 0) {
+            $path = 'canzoni/' . $path;
         }
+        
+        // Verifica che il file esista
+        if (file_exists($path)) {
+            $file_path = $path;
+        } else if (file_exists('./' . $path)) {
+            $file_path = './' . $path;
+        } else if (file_exists('../' . $path)) {
+            $file_path = '../' . $path;
+        } else {
+            error_log("File non trovato: cercato in $path, ./$path, ../$path");
+            http_response_code(404);
+            exit;
+        }
+        
+        // Determina tipo MIME
+        $extension = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
+        $mime_types = [
+            'mp3' => 'audio/mpeg',
+            'wav' => 'audio/wav',
+            'ogg' => 'audio/ogg',
+            'm4a' => 'audio/mp4'
+        ];
+        
+        $mime_type = $mime_types[$extension] ?? 'audio/mpeg';
+        
+        // Headers
+        header("Content-Type: $mime_type");
+        header("Content-Length: " . filesize($file_path));
+        header("Content-Disposition: inline");
+        header("Accept-Ranges: bytes");
+        header("Cache-Control: public, max-age=31536000");
+        
+        // Leggi e invia file
+        readfile($file_path);
+        exit;
+        
     } else {
         http_response_code(404);
         echo "Canzone non trovata";
     }
+    $conn->close();
 } else {
     http_response_code(400);
     echo "ID canzone non specificato";

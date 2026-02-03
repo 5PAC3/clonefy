@@ -103,11 +103,115 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <script>
+        // Funzione per comunicare con il player globale
+        function sendToGlobalPlayer(message) {
+            const iframe = document.getElementById('global-player-frame');
+            
+            if (iframe && iframe.contentWindow) {
+                console.log("Invio messaggio al player:", message);
+                iframe.contentWindow.postMessage(message, '*');
+            } else {
+                console.error("Iframe del player non trovato");
+                // Salva nel localStorage come fallback
+                if (message.type === 'GLOBAL_PLAYER_PLAY_SONG') {
+                    localStorage.setItem('pending_player_command', JSON.stringify(message));
+                }
+            }
+        }
+
+        // Al caricamento di ogni pagina, controlla se c'è una canzone in riproduzione
+        document.addEventListener('DOMContentLoaded', function() {
+            // Controlla se ci sono comandi pendenti
+            const pendingCommand = localStorage.getItem('pending_player_command');
+            if (pendingCommand) {
+                try {
+                    const command = JSON.parse(pendingCommand);
+                    sendToGlobalPlayer(command);
+                    localStorage.removeItem('pending_player_command');
+                } catch (e) {
+                    console.error("Errore nel parsing del comando pendente:", e);
+                }
+            }
+            
+            // Ascolta messaggi dal player
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
+                    console.log("Aggiornamento stato player:", event.data);
+                    // Puoi aggiornare UI qui se necessario
+                }
+            });
+        });
+        // Tasti da tastiera per controllare il player
+        document.addEventListener('keydown', function(e) {
+            // Spazio per play/pause globale
+            if (e.key === ' ' && !e.target.matches('input, textarea, select, button')) {
+                e.preventDefault();
+                sendToGlobalPlayer({type: 'GLOBAL_PLAYER_TOGGLE'});
+            }
+            
+            // Freccia sinistra/destra per navigare tra canzoni
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                sendToGlobalPlayer({type: 'GLOBAL_PLAYER_PREV'});
+            }
+            
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                sendToGlobalPlayer({type: 'GLOBAL_PLAYER_NEXT'});
+            }
+        });
+        // Ascolta gli aggiornamenti del player
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
+                const state = event.data.state;
+                
+                // Aggiorna UI della pagina corrente
+                if (state.currentSong) {
+                    // Evidenzia la canzone in riproduzione
+                    document.querySelectorAll('[data-song-id]').forEach(element => {
+                        if (parseInt(element.dataset.songId) === state.currentSong.id) {
+                            element.classList.add('song-playing');
+                            
+                            // Aggiorna i pulsanti Play/Pausa
+                            const playBtn = element.querySelector('.btn-play-playlist, .btn-play-search');
+                            const pauseBtn = element.querySelector('.btn-pause-playlist, .btn-pause-search');
+                            
+                            if (playBtn) {
+                                if (state.isPlaying) {
+                                    playBtn.style.display = 'none';
+                                    if (pauseBtn) pauseBtn.style.display = 'inline-block';
+                                    playBtn.classList.add('playing');
+                                } else {
+                                    playBtn.style.display = 'inline-block';
+                                    if (pauseBtn) pauseBtn.style.display = 'none';
+                                    playBtn.classList.remove('playing');
+                                }
+                            }
+                        } else {
+                            element.classList.remove('song-playing');
+                            
+                            // Ripristina i pulsanti
+                            const playBtn = element.querySelector('.btn-play-playlist, .btn-play-search');
+                            const pauseBtn = element.querySelector('.btn-pause-playlist, .btn-pause-search');
+                            
+                            if (playBtn) {
+                                playBtn.style.display = 'inline-block';
+                                playBtn.classList.remove('playing');
+                                if (pauseBtn) pauseBtn.style.display = 'none';
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    </script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title><?php echo htmlspecialchars($playlist['nome']); ?> - Clonefy</title>
@@ -121,8 +225,26 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
-    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>
+    <iframe id="global-player-frame" 
+        src="player_bar.php" 
+        style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998; background: transparent;"
+        allow="autoplay *">
+    </iframe>
     <style>
+        .song-playing {
+    background: rgba(139, 0, 255, 0.1) !important;
+    border-left: 3px solid #8b00ff !important;
+}
+
+.song-playing-row {
+    background: rgba(139, 0, 255, 0.1) !important;
+    border-left: 3px solid #8b00ff !important;
+}
+
+.btn-play-playlist.playing,
+.btn-play-search.playing {
+    background: linear-gradient(135deg, #ff4d4d, #ff3333) !important;
+}
         .song-playing-row {
             background: rgba(139, 0, 255, 0.1) !important;
             border-left: 3px solid #8b00ff !important;
@@ -505,8 +627,8 @@ if (isset($_POST['azione']) && $_POST['azione'] === 'aggiungi_canzoni' && isset(
         </div>
     </div>
 
-    <!-- IFRAME per il player globale -->
-    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>
+    <!-- IFRAME per il player globale 
+    <iframe id="global-player-frame" src="player_bar.php" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; border: none; z-index: 9998;"></iframe>-->
 
     <script>
     // Funzione per comunicare con il player globale
@@ -516,62 +638,36 @@ function sendToGlobalPlayer(message) {
     const iframe = document.getElementById('global-player-frame');
     
     if (iframe && iframe.contentWindow) {
+        console.log("Invio messaggio al player:", message);
         iframe.contentWindow.postMessage(message, '*');
+    } else {
+        console.error("Iframe del player non trovato");
+        // Salva nel localStorage come fallback
+        if (message.type === 'GLOBAL_PLAYER_PLAY_SONG') {
+            localStorage.setItem('pending_player_command', JSON.stringify(message));
+        }
     }
-    
-    // DEBUG: mostra in console cosa stiamo inviando
-    console.log("Inviato al player:", message);
 }
 
 // Al caricamento di ogni pagina, controlla se c'è una canzone in riproduzione
 document.addEventListener('DOMContentLoaded', function() {
-    // Controlla se c'è una canzone pendente da caricare
-    const pendingSong = localStorage.getItem('pending_song');
-    if (pendingSong) {
+    // Controlla se ci sono comandi pendenti
+    const pendingCommand = localStorage.getItem('pending_player_command');
+    if (pendingCommand) {
         try {
-            const data = JSON.parse(pendingSong);
-            if (data.song) {
-                // Attendi che l'iframe sia pronto
-                const checkIframe = setInterval(() => {
-                    const iframe = document.getElementById('global-player-frame');
-                    if (iframe && iframe.contentWindow) {
-                        clearInterval(checkIframe);
-                        sendToGlobalPlayer({
-                            type: 'GLOBAL_PLAYER_PLAY_SONG',
-                            song: data.song,
-                            playlist: data.playlist,
-                            currentIndex: data.index
-                        });
-                    }
-                }, 100);
-                
-                // Timeout dopo 3 secondi
-                setTimeout(() => clearInterval(checkIframe), 3000);
-            }
-        } catch (error) {
-            console.error("Errore nel parsing della canzone pendente:", error);
+            const command = JSON.parse(pendingCommand);
+            sendToGlobalPlayer(command);
+            localStorage.removeItem('pending_player_command');
+        } catch (e) {
+            console.error("Errore nel parsing del comando pendente:", e);
         }
     }
     
     // Ascolta messaggi dal player
     window.addEventListener('message', function(event) {
         if (event.data && event.data.type === 'PLAYER_STATE_UPDATE') {
-            // Il player ci informa dello stato corrente
-            console.log("Stato player aggiornato:", event.data);
-            
-            // Puoi aggiornare l'UI se necessario (evidenziare canzone corrente, etc.)
-            if (event.data.song) {
-                // Rimuovi evidenziazione da tutte le canzoni
-                document.querySelectorAll('.song-playing, .current-song-highlight').forEach(el => {
-                    el.classList.remove('song-playing', 'current-song-highlight');
-                });
-                
-                // Evidenzia canzone corrente
-                const currentSongElement = document.querySelector(`[data-song-id="${event.data.song.id}"]`);
-                if (currentSongElement) {
-                    currentSongElement.classList.add('song-playing', 'current-song-highlight');
-                }
-            }
+            console.log("Aggiornamento stato player:", event.data);
+            // Puoi aggiornare UI qui se necessario
         }
     });
 });
