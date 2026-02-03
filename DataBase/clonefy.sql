@@ -67,14 +67,6 @@ CREATE TABLE `songs` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
---
--- Dumping data for table `songs`
---
-
-INSERT INTO `songs` (`id`, `user_id`, `titolo`, `artista`, `genere`, `anno`, `durata`, `file_path`, `copertina`, `created_at`) VALUES
-(1, 1, 'See you again', 'Tyler the Creator', 'Pop?', 2020, NULL, 'canzoni/81/df/81df4c1eec4b2da42d87cf4d24b787fe.mp3', NULL, '2026-01-28 08:01:18');
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `users`
@@ -89,15 +81,6 @@ CREATE TABLE `users` (
   `ruolo` enum('user','artist','admin') DEFAULT 'user'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `is_artist`, `ruolo`) VALUES
-(1, 'sarto', 'no@no', '$2y$10$k77iUghDlXwUibJDDHbYSOZPm8NfYRc83SttrrIeZjdFkGi.re3j.', 0, 'user'),
-(2, 'testConn', 'test@test.com', '$2y$10$dJtdnQfUblvoYAaTIcaA2u/OVjRMPZ/xD0dCt/PfXN1kUFo7tDwpq', 0, 'user');
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `user_playlist_membership`
