@@ -527,7 +527,7 @@
                                             <i class="fas fa-music"></i>
                                         </div>
                                         <h5 class="text-muted mb-2">Nessuna playlist</h5>
-                                        <p class="text-muted mb-4">Crea la tua prima playlist o accetta inviti!</p>
+                                        <p class="text-muted mb-4">Crea la tua prima playlist!</p>
                                         <button class="btn btn-dark" data-toggle="modal" data-target="#creaPlaylistModal" style="border: 1px solid rgba(139, 0, 255, 0.3);">
                                             <i class="fas fa-plus mr-1"></i>Crea Playlist
                                         </button>
